@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>JIVAC Patrol</title>
+  <style>
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+    body {
+      font-family:'Segoe UI', system-ui, sans-serif;
+      background: linear-gradient(160deg, #062B63 0%, #03163a 100%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 20px;
+      padding: 40px 32px 36px;
+      width: 100%;
+      max-width: 360px;
+      text-align: center;
+      box-shadow: 0 32px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05);
+    }
+
+    /* Header */
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding-bottom: 20px;
+      margin-bottom: 28px;
+      border-bottom: 2px solid #C9A24A;
+    }
+    .logo-box {
+      width: 36px; height: 36px;
+      background: #111;
+      border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 900; font-size: 13px; color: #C9A24A; letter-spacing: -1px;
+    }
+    .brand-name { font-size: 15px; font-weight: 800; color: #111; letter-spacing: 1px; }
+
+    /* States */
+    .state { display: none; }
+    .state.active { display: block; }
+
+    /* Loading */
+    #s-loading .ring {
+      width: 60px; height: 60px;
+      border: 5px solid #f0f0f0;
+      border-top-color: #0B4FAF;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 18px;
+    }
+    @keyframes spin { to { transform:rotate(360deg); } }
+    #s-loading p { color: #777; font-size: 15px; }
+
+    /* Success */
+    .icon-circle {
+      width: 80px; height: 80px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 20px;
+      animation: pop 0.45s cubic-bezier(.175,.885,.32,1.275);
+    }
+    @keyframes pop {
+      from { transform:scale(0); opacity:0; }
+      to   { transform:scale(1); opacity:1; }
+    }
+    .icon-circle.green { background: #edfaf1; }
+    .icon-circle.amber { background: #fdf8ec; }
+    .icon-circle.red   { background: #fef0f0; }
+
+    .icon-circle svg {
+      width: 36px; height: 36px;
+      stroke-width: 3; fill: none;
+      stroke-linecap: round; stroke-linejoin: round;
+    }
+    .icon-circle.green svg { stroke: #2FA84F; }
+    .icon-circle.amber svg { stroke: #C9A24A; }
+    .icon-circle.red   svg { stroke: #E52424; }
+
+    .state-title {
+      font-size: 22px; font-weight: 800; color: #111;
+      margin-bottom: 6px;
+    }
+    .state-sub {
+      font-size: 14px; color: #888; line-height: 1.5;
+    }
+
+    .chip {
+      display: inline-block;
+      margin-top: 18px;
+      padding: 6px 18px;
+      border-radius: 20px;
+      font-size: 12px; font-weight: 700;
+    }
+    .chip.blue   { background: #eef4ff; color: #0B4FAF; border:1px solid #c5d8fa; }
+    .chip.green  { background: #edfaf1; color: #2FA84F; border:1px solid #b3e8c3; }
+
+    /* Point name highlight */
+    .point-highlight { color: #0B4FAF; font-weight: 700; }
+    .loc-highlight   { color: #888; }
+
+    footer {
+      margin-top: 28px;
+      font-size: 11px;
+      color: rgba(255,255,255,0.25);
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <div class="card-header">
+    <div class="logo-box">JG</div>
+    <div class="brand-name">JIVAC GROUP</div>
+  </div>
+
+  <!-- LOADING -->
+  <div id="s-loading" class="state active">
+    <div class="ring"></div>
+    <p>Recording patrol point…</p>
+  </div>
+
+  <!-- SUCCESS -->
+  <div id="s-success" class="state">
+    <div class="icon-circle green">
+      <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+    </div>
+    <div class="state-title">Patrol Submitted</div>
+    <div class="state-sub">
+      <span class="point-highlight" id="disp-point"></span><br>
+      <span class="loc-highlight"   id="disp-loc"></span>
+    </div>
+    <div class="chip green">✓ Point Recorded</div>
+  </div>
+
+  <!-- ALREADY SCANNED -->
+  <div id="s-already" class="state">
+    <div class="icon-circle amber">
+      <svg viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="12" y1="8" x2="12" y2="12"/>
+        <line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+    </div>
+    <div class="state-title">Already Scanned</div>
+    <div class="state-sub">This point was already recorded this hour.<br>No duplicate needed.</div>
+    <div class="chip blue">Point logged earlier</div>
+  </div>
+
+  <!-- INVALID -->
+  <div id="s-error" class="state">
+    <div class="icon-circle red">
+      <svg viewBox="0 0 24 24">
+        <line x1="18" y1="6" x2="6" y2="18"/>
+        <line x1="6"  y1="6" x2="18" y2="18"/>
+      </svg>
+    </div>
+    <div class="state-title">Invalid Code</div>
+    <div class="state-sub">This QR code is not recognised.<br>Contact your supervisor.</div>
+  </div>
+</div>
+
+<footer>JIVAC GROUP · Patrol Management System</footer>
+
+<script>
+  // ── CONFIG ─────────────────────────────────────────
+  const SUPA_URL = window.JIVAC_CONFIG?.SUPABASE_URL      || 'YOUR_SUPABASE_URL';
+  const SUPA_KEY = window.JIVAC_CONFIG?.SUPABASE_ANON_KEY || 'YOUR_SUPABASE_ANON_KEY';
+  // ───────────────────────────────────────────────────
+
+  function show(id) {
+    document.querySelectorAll('.state').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+
+  async function db(method, path, body) {
+    const r = await fetch(`${SUPA_URL}/rest/v1/${path}`, {
+      method,
+      headers: {
+        'apikey': SUPA_KEY,
+        'Authorization': `Bearer ${SUPA_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': method === 'POST' ? 'return=representation' : ''
+      },
+      body: body ? JSON.stringify(body) : undefined
+    });
+    if (r.status === 204) return true;
+    return r.json().catch(() => null);
+  }
+
+  async function run() {
+    const qrCode = new URLSearchParams(window.location.search).get('qr');
+    if (!qrCode) { show('s-error'); return; }
+
+    try {
+      // 1. Look up patrol point
+      const pts = await db('GET',
+        `patrol_points?qr_code=eq.${encodeURIComponent(qrCode)}&select=id,point_name,location_id,locations(name,total_points,is_active)`
+      );
+
+      if (!pts || pts.length === 0) { show('s-error'); return; }
+
+      const pt  = pts[0];
+      const loc = pt.locations;
+
+      // Reject if location inactive
+      if (!loc.is_active) { show('s-error'); return; }
+
+      // 2. Check already scanned this hour
+      const now       = new Date();
+      const hourStart = new Date(now); hourStart.setMinutes(0,0,0);
+      const hourEnd   = new Date(now); hourEnd.setMinutes(59,59,999);
+
+      const existing = await db('GET',
+        `scans?patrol_point_id=eq.${pt.id}&scanned_at=gte.${hourStart.toISOString()}&scanned_at=lte.${hourEnd.toISOString()}&select=id`
+      );
+
+      if (existing && existing.length > 0) { show('s-already'); return; }
+
+      // 3. Record scan
+      await db('POST', 'scans', {
+        patrol_point_id: pt.id,
+        location_id:     pt.location_id,
+        qr_code:         qrCode
+      });
+
+      // 4. Check if all points for this location scanned this hour
+      const allScans = await db('GET',
+        `scans?location_id=eq.${pt.location_id}&scanned_at=gte.${hourStart.toISOString()}&scanned_at=lte.${hourEnd.toISOString()}&select=patrol_point_id`
+      );
+
+      const unique = new Set(allScans.map(s => s.patrol_point_id));
+
+      if (unique.size >= loc.total_points) {
+        // All points done — record completed round (avoid duplicate)
+        const h     = now.getHours();
+        const today = now.toISOString().split('T')[0];
+
+        const exists = await db('GET',
+          `patrol_rounds?location_id=eq.${pt.location_id}&round_date=eq.${today}&hour_window=eq.${h}&select=id`
+        );
+
+        if (!exists || exists.length === 0) {
+          await db('POST', 'patrol_rounds', {
+            location_id:  pt.location_id,
+            status:       'completed',
+            completed_at: now.toISOString(),
+            round_date:   today,
+            hour_window:  h
+          });
+        }
+      }
+
+      // 5. Show success
+      document.getElementById('disp-point').textContent = pt.point_name;
+      document.getElementById('disp-loc').textContent   = loc.name;
+      show('s-success');
+
+    } catch(e) {
+      console.error(e);
+      show('s-error');
+    }
+  }
+
+  run();
+</script>
+
+</body>
+</html>

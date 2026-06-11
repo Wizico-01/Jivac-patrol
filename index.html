@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>JIVAC GROUP — Patrol Management System</title>
+  <style>
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+    :root {
+      --navy:  #062B63;
+      --blue:  #0B4FAF;
+      --gold:  #C9A24A;
+      --white: #FFFFFF;
+      --black: #111111;
+      --green: #2FA84F;
+      --red:   #E52424;
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: #07101f;
+      color: var(--white);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── HEADER ── */
+    header {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      background: rgba(6,43,99,0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(201,162,74,0.3);
+      height: 64px;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 40px;
+    }
+
+    .hd-brand { display:flex; align-items:center; gap:12px; }
+
+    .logo-box {
+      width: 40px; height: 40px;
+      background: var(--gold); border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 900; font-size: 15px; color: var(--black); letter-spacing: -1px;
+    }
+
+    .brand-text h1 { font-size: 16px; font-weight: 800; letter-spacing: 1.5px; line-height: 1; }
+    .brand-text p  { font-size: 9px; color: var(--gold); letter-spacing: 2.5px; text-transform: uppercase; margin-top: 2px; }
+
+    .hd-right { display:flex; align-items:center; gap:12px; }
+
+    .live-pill {
+      display: flex; align-items: center; gap: 7px;
+      background: rgba(47,168,79,0.1); border: 1px solid rgba(47,168,79,0.3);
+      border-radius: 20px; padding: 5px 14px;
+      font-size: 11px; font-weight: 700; color: #2FA84F; letter-spacing: 1px;
+    }
+    .live-dot {
+      width: 7px; height: 7px; background: #2FA84F; border-radius: 50%;
+      animation: blink 1.6s ease-in-out infinite;
+    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+    #hd-clock {
+      font-size: 14px; font-weight: 600; color: rgba(255,255,255,0.4);
+      font-variant-numeric: tabular-nums; letter-spacing: 1px;
+    }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 100px 40px 60px;
+      position: relative;
+      text-align: center;
+      overflow: hidden;
+    }
+
+    /* Ambient background glow */
+    .hero::before {
+      content: '';
+      position: absolute; top: -20%; left: 50%; transform: translateX(-50%);
+      width: 700px; height: 700px;
+      background: radial-gradient(circle, rgba(11,79,175,0.18) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero::after {
+      content: '';
+      position: absolute; bottom: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(201,162,74,0.4), transparent);
+    }
+
+    /* Scanline grid overlay */
+    .grid-bg {
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(rgba(11,79,175,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(11,79,175,0.04) 1px, transparent 1px);
+      background-size: 48px 48px;
+      pointer-events: none;
+    }
+
+    .hero-eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(201,162,74,0.1); border: 1px solid rgba(201,162,74,0.25);
+      border-radius: 20px; padding: 6px 16px;
+      font-size: 11px; font-weight: 700; color: var(--gold); letter-spacing: 2px;
+      text-transform: uppercase; margin-bottom: 24px;
+      position: relative; z-index: 1;
+    }
+
+    .hero-title {
+      font-size: clamp(36px, 6vw, 64px);
+      font-weight: 900;
+      line-height: 1.08;
+      letter-spacing: -1px;
+      margin-bottom: 20px;
+      position: relative; z-index: 1;
+    }
+
+    .hero-title .accent { color: var(--gold); }
+
+    .hero-sub {
+      font-size: clamp(14px, 2vw, 18px);
+      color: rgba(255,255,255,0.45);
+      max-width: 520px;
+      line-height: 1.6;
+      margin-bottom: 48px;
+      position: relative; z-index: 1;
+    }
+
+    /* ── STATUS BAR ── */
+    .status-bar {
+      display: flex; align-items: center; gap: 0;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px; overflow: hidden;
+      margin-bottom: 64px;
+      position: relative; z-index: 1;
+    }
+
+    .status-item {
+      padding: 14px 28px; text-align: center;
+      border-right: 1px solid rgba(255,255,255,0.07);
+    }
+    .status-item:last-child { border-right: none; }
+
+    .status-item .s-val {
+      font-size: 26px; font-weight: 900; line-height: 1;
+      margin-bottom: 4px;
+    }
+    .status-item .s-lbl {
+      font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px;
+      color: rgba(255,255,255,0.3);
+    }
+
+    .s-val.gold  { color: var(--gold); }
+    .s-val.green { color: var(--green); }
+    .s-val.red   { color: var(--red); }
+
+    /* ── FEATURE CARDS ── */
+    .cards-section {
+      padding: 0 40px 80px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .cards-label {
+      font-size: 11px; text-transform: uppercase; letter-spacing: 2.5px;
+      color: rgba(255,255,255,0.25);
+      margin-bottom: 20px; text-align: center;
+    }
+
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+
+    /* Big card (spans 2 cols) */
+    .card-big { grid-column: span 2; }
+
+    .feature-card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
+      padding: 28px 28px 24px;
+      text-decoration: none;
+      color: inherit;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.25s, border-color 0.25s, background 0.25s;
+      cursor: pointer;
+    }
+
+    .feature-card:hover {
+      transform: translateY(-3px);
+      border-color: rgba(201,162,74,0.35);
+      background: rgba(255,255,255,0.06);
+    }
+
+    /* Coloured top accent bar */
+    .feature-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      border-radius: 16px 16px 0 0;
+    }
+    .card-control::before  { background: linear-gradient(90deg, var(--green), #4adf7f); }
+    .card-admin::before    { background: linear-gradient(90deg, var(--blue), #4DA8FF); }
+    .card-qr::before       { background: linear-gradient(90deg, var(--gold), #e8c87a); }
+    .card-config::before   { background: linear-gradient(90deg, #8B5A2B, #c4874a); }
+
+    .card-icon {
+      width: 48px; height: 48px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 16px; flex-shrink: 0;
+    }
+    .card-control .card-icon  { background: rgba(47,168,79,0.12); }
+    .card-admin   .card-icon  { background: rgba(11,79,175,0.15); }
+    .card-qr      .card-icon  { background: rgba(201,162,74,0.12); }
+    .card-config  .card-icon  { background: rgba(139,90,43,0.15); }
+
+    .card-icon svg {
+      width: 24px; height: 24px; fill: none; stroke-width: 2;
+      stroke-linecap: round; stroke-linejoin: round;
+    }
+    .card-control .card-icon svg { stroke: var(--green); }
+    .card-admin   .card-icon svg { stroke: #4DA8FF; }
+    .card-qr      .card-icon svg { stroke: var(--gold); }
+    .card-config  .card-icon svg { stroke: #c4874a; }
+
+    .card-tag {
+      font-size: 10px; font-weight: 700; letter-spacing: 2px;
+      text-transform: uppercase; margin-bottom: 8px;
+    }
+    .card-control .card-tag  { color: var(--green); }
+    .card-admin   .card-tag  { color: #4DA8FF; }
+    .card-qr      .card-tag  { color: var(--gold); }
+    .card-config  .card-tag  { color: #c4874a; }
+
+    .card-title {
+      font-size: 20px; font-weight: 800; margin-bottom: 8px; line-height: 1.2;
+    }
+
+    .card-desc {
+      font-size: 13px; color: rgba(255,255,255,0.45); line-height: 1.6; flex: 1;
+    }
+
+    .card-cta {
+      display: inline-flex; align-items: center; gap: 6px;
+      margin-top: 20px; font-size: 13px; font-weight: 700;
+      transition: gap 0.2s;
+    }
+    .card-control .card-cta { color: var(--green); }
+    .card-admin   .card-cta { color: #4DA8FF; }
+    .card-qr      .card-cta { color: var(--gold); }
+    .card-config  .card-cta { color: #c4874a; }
+
+    .feature-card:hover .card-cta { gap: 10px; }
+
+    /* Big card layout tweak */
+    .card-big .feature-card {
+      flex-direction: row;
+      align-items: flex-start;
+      gap: 24px;
+    }
+    .card-big .feature-card .card-body { flex: 1; }
+    .card-big .feature-card .card-icon { margin-bottom: 0; margin-top: 4px; }
+
+    /* ── HOW IT WORKS ── */
+    .how-section {
+      padding: 0 40px 80px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .how-title {
+      font-size: 11px; text-transform: uppercase; letter-spacing: 2.5px;
+      color: rgba(255,255,255,0.25); margin-bottom: 24px; text-align: center;
+    }
+
+    .flow-row {
+      display: flex; align-items: flex-start; gap: 0;
+    }
+
+    .flow-step {
+      flex: 1; text-align: center; padding: 0 16px; position: relative;
+    }
+
+    /* connector line between steps */
+    .flow-step:not(:last-child)::after {
+      content: '';
+      position: absolute; top: 24px; right: -1px;
+      width: 100%; height: 1px;
+      background: linear-gradient(90deg, rgba(201,162,74,0.3), transparent);
+      pointer-events: none;
+    }
+
+    .flow-num {
+      width: 48px; height: 48px; border-radius: 50%;
+      background: rgba(201,162,74,0.1); border: 1px solid rgba(201,162,74,0.25);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; font-weight: 900; color: var(--gold);
+      margin: 0 auto 14px;
+    }
+
+    .flow-step h3 { font-size: 14px; font-weight: 700; margin-bottom: 6px; }
+    .flow-step p  { font-size: 12px; color: rgba(255,255,255,0.35); line-height: 1.5; }
+
+    /* ── FOOTER ── */
+    footer {
+      text-align: center; padding: 28px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+      font-size: 11px; color: rgba(255,255,255,0.2);
+      letter-spacing: 1px; text-transform: uppercase;
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 768px) {
+      header { padding: 0 20px; }
+      #hd-clock { display: none; }
+      .hero { padding: 90px 20px 40px; }
+      .status-bar { flex-wrap: wrap; }
+      .status-item { flex: 1; min-width: 100px; }
+      .cards-section, .how-section { padding: 0 20px 60px; }
+      .cards-grid { grid-template-columns: 1fr; }
+      .card-big { grid-column: span 1; }
+      .card-big .feature-card { flex-direction: column; }
+      .card-big .feature-card .card-icon { margin-bottom: 16px; }
+      .flow-row { flex-direction: column; gap: 24px; }
+      .flow-step::after { display: none; }
+    }
+  </style>
+ <script src="config.html"></script>
+</head>
+<body>
+
+<!-- ── HEADER ── -->
+<header>
+  <div class="hd-brand">
+    <div class="logo-box">JG</div>
+    <div class="brand-text">
+      <h1>JIVAC GROUP</h1>
+      <p>Patrol Management System</p>
+    </div>
+  </div>
+  <div class="hd-right">
+    <div class="live-pill"><div class="live-dot"></div>SYSTEM ACTIVE</div>
+    <div id="hd-clock"></div>
+  </div>
+</header>
+
+<!-- ── HERO ── -->
+<section class="hero">
+  <div class="grid-bg"></div>
+
+  <div class="hero-eyebrow">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+    </svg>
+    JIVAC GROUP · TECHNOLOGIES
+  </div>
+
+  <h1 class="hero-title">
+    Guard Patrol System<br>
+    <span class="accent">Powered by QR</span>
+  </h1>
+
+  <p class="hero-sub">
+    Deploy guards. Configure patrol points. Generate QR codes.
+    Monitor every location from your control room — live.
+  </p>
+
+  <!-- Live summary from Supabase -->
+  <div class="status-bar">
+    <div class="status-item">
+      <div class="s-val gold" id="stat-locations">—</div>
+      <div class="s-lbl">Active Locations</div>
+    </div>
+    <div class="status-item">
+      <div class="s-val green" id="stat-completed">—</div>
+      <div class="s-lbl">Completed This Hour</div>
+    </div>
+    <div class="status-item">
+      <div class="s-val red" id="stat-nopatrol">—</div>
+      <div class="s-lbl">No Patrol</div>
+    </div>
+    <div class="status-item">
+      <div class="s-val gold" id="stat-rounds">—</div>
+      <div class="s-lbl">Rounds Today</div>
+    </div>
+  </div>
+
+</section>
+
+<!-- ── FEATURE CARDS ── -->
+<section class="cards-section">
+  <div class="cards-label">Quick Access — Select a module</div>
+
+  <div class="cards-grid">
+
+    <!-- Control Room — big card -->
+    <div class="card-big">
+      <a href="control-room.html" class="feature-card card-control">
+        <div class="card-icon">
+          <svg viewBox="0 0 24 24">
+            <rect x="2" y="3" width="20" height="14" rx="2"/>
+            <line x1="8" y1="21" x2="16" y2="21"/>
+            <line x1="12" y1="17" x2="12" y2="21"/>
+            <circle cx="7" cy="10" r="1" fill="currentColor" stroke="none"/>
+            <path d="M10 10h7M10 7h4"/>
+          </svg>
+        </div>
+        <div class="card-body">
+          <div class="card-tag">Live Monitor</div>
+          <div class="card-title">Control Room</div>
+          <div class="card-desc">
+            Your live operations screen. See every deployed location in real time —
+            <strong style="color:rgba(255,255,255,0.7)">Completed</strong> or
+            <strong style="color:rgba(255,255,255,0.7)">No Patrol</strong>.
+            Updates automatically the moment a patrol round is finished.
+          </div>
+          <div class="card-cta">Open Control Room →</div>
+        </div>
+      </a>
+    </div>
+
+    <!-- Admin -->
+    <a href="admin.html" class="feature-card card-admin">
+      <div class="card-icon">
+        <svg viewBox="0 0 24 24">
+          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+        </svg>
+      </div>
+      <div class="card-tag">Management</div>
+      <div class="card-title">Admin Panel</div>
+      <div class="card-desc">
+        Add companies, configure patrol points per location, manage active deployments.
+      </div>
+      <div class="card-cta">Open Admin →</div>
+    </a>
+
+    <!-- QR Codes -->
+    <a href="admin.html#qr" class="feature-card card-qr">
+      <div class="card-icon">
+        <svg viewBox="0 0 24 24">
+          <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+          <rect x="3" y="14" width="7" height="7"/>
+          <rect x="14" y="14" width="3" height="3"/><rect x="19" y="14" width="2" height="2"/>
+          <rect x="14" y="19" width="2" height="2"/><rect x="18" y="18" width="3" height="3"/>
+        </svg>
+      </div>
+      <div class="card-tag">Print & Deploy</div>
+      <div class="card-title">QR Codes</div>
+      <div class="card-desc">
+        Generate and print QR codes for each patrol point. Select a location in Admin to print its codes.
+      </div>
+      <div class="card-cta">Generate QR Codes →</div>
+    </a>
+
+  </div>
+</section>
+
+<!-- ── HOW IT WORKS ── -->
+<section class="how-section">
+  <div class="how-title">How it works</div>
+  <div class="flow-row">
+    <div class="flow-step">
+      <div class="flow-num">1</div>
+      <h3>Add Location</h3>
+      <p>Enter company name and each patrol point in the Admin panel</p>
+    </div>
+    <div class="flow-step">
+      <div class="flow-num">2</div>
+      <h3>Print QR Codes</h3>
+      <p>Generate unique QR codes and stick them at each patrol point</p>
+    </div>
+    <div class="flow-step">
+      <div class="flow-num">3</div>
+      <h3>Guards Patrol</h3>
+      <p>Guards scan each code with their phone — no app, no form needed</p>
+    </div>
+    <div class="flow-step">
+      <div class="flow-num">4</div>
+      <h3>Monitor Live</h3>
+      <p>Control room sees Completed or No Patrol per location every hour</p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  JIVAC GROUP · Technologies | Farms · Patrol Management System
+</footer>
+
+<script>
+  // ── CONFIG ──────────────────────────────────────────────────
+  const SUPA_URL = window.JIVAC_CONFIG?.SUPABASE_URL      || 'YOUR_SUPABASE_URL';
+  const SUPA_KEY = window.JIVAC_CONFIG?.SUPABASE_ANON_KEY || 'YOUR_SUPABASE_ANON_KEY';
+  // ────────────────────────────────────────────────────────────
+
+  // Clock
+  function tick() {
+    const n = new Date();
+    document.getElementById('hd-clock').textContent =
+      n.toLocaleTimeString('en-NG', { hour12: false });
+  }
+  tick(); setInterval(tick, 1000);
+
+  // Live stats
+  async function loadStats() {
+    try {
+      const now   = new Date();
+      const h     = now.getHours();
+      const today = now.toISOString().split('T')[0];
+
+      const [locs, completedHour, todayRounds] = await Promise.all([
+        fetch(`${SUPA_URL}/rest/v1/locations?is_active=eq.true&select=id`, { headers: { apikey: SUPA_KEY, Authorization: `Bearer ${SUPA_KEY}` } }).then(r => r.json()),
+        fetch(`${SUPA_URL}/rest/v1/patrol_rounds?round_date=eq.${today}&hour_window=eq.${h}&status=eq.completed&select=id`, { headers: { apikey: SUPA_KEY, Authorization: `Bearer ${SUPA_KEY}` } }).then(r => r.json()),
+        fetch(`${SUPA_URL}/rest/v1/patrol_rounds?round_date=eq.${today}&status=eq.completed&select=id`, { headers: { apikey: SUPA_KEY, Authorization: `Bearer ${SUPA_KEY}` } }).then(r => r.json()),
+      ]);
+
+      const total     = Array.isArray(locs) ? locs.length : 0;
+      const completed = Array.isArray(completedHour) ? completedHour.length : 0;
+      const noPatrol  = total - completed;
+      const rounds    = Array.isArray(todayRounds) ? todayRounds.length : 0;
+
+      document.getElementById('stat-locations').textContent  = total;
+      document.getElementById('stat-completed').textContent  = completed;
+      document.getElementById('stat-nopatrol').textContent   = noPatrol < 0 ? 0 : noPatrol;
+      document.getElementById('stat-rounds').textContent     = rounds;
+
+    } catch(e) {
+      // Silently fail if Supabase not configured yet
+    }
+  }
+
+  loadStats();
+  setInterval(loadStats, 30000);
+</script>
+
+</body>
+</html>

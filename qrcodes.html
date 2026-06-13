@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>JIVAC QR Codes</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <style>
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+    :root {
+      --navy: #062B63; --sky: #1E90FF; --gold: #C9A24A;
+      --black: #111111; --green: #2FA84F;
+    }
+
+    body { font-family:'Segoe UI',system-ui,sans-serif; background:#f0f4ff; color:var(--black); min-height:100vh; }
+
+    header {
+      background: var(--navy); border-bottom: 3px solid var(--gold);
+      height: 64px; display: flex; align-items: center; justify-content: space-between;
+      padding: 0 32px; position: sticky; top:0; z-index:100;
+      box-shadow: 0 2px 20px rgba(6,43,99,0.3);
+    }
+    .hd-left { display:flex; align-items:center; gap:12px; }
+    .logo-box {
+      width:40px; height:40px; background:var(--gold); border-radius:7px;
+      display:flex; align-items:center; justify-content:center;
+      font-weight:900; font-size:15px; color:var(--black);
+    }
+    .hd-title h1 { font-size:16px; font-weight:800; letter-spacing:1.5px; color:#fff; }
+    .hd-title p  { font-size:9px; color:var(--gold); letter-spacing:2.5px; text-transform:uppercase; margin-top:1px; }
+
+    .nav-links { display:flex; gap:8px; }
+    .nav-link {
+      padding:7px 16px; border-radius:7px; font-size:12px; font-weight:600;
+      text-decoration:none; color:rgba(255,255,255,0.6);
+      border:1px solid transparent; transition:all 0.2s;
+    }
+    .nav-link:hover { color:#fff; border-color:rgba(255,255,255,0.3); }
+    .nav-link.active { background:rgba(255,255,255,0.15); color:#fff; border-color:rgba(255,255,255,0.2); }
+
+    main { padding:32px; max-width:1200px; margin:0 auto; }
+
+    .page-header {
+      display:flex; align-items:center; justify-content:space-between; margin-bottom:28px;
+    }
+    .page-header h2 { font-size:22px; font-weight:800; color:var(--navy); }
+    .page-header p  { font-size:13px; color:#888; margin-top:3px; }
+
+    .print-btn {
+      background:var(--navy); color:#fff; border:none; border-radius:8px;
+      padding:10px 20px; font-size:13px; font-weight:700; cursor:pointer;
+      display:flex; align-items:center; gap:8px; transition:opacity 0.2s;
+    }
+    .print-btn:hover { opacity:0.85; }
+
+    /* Location block */
+    .loc-block {
+      background:#fff; border:1.5px solid #e0e7ff; border-radius:16px;
+      margin-bottom:28px; overflow:hidden;
+      box-shadow:0 2px 12px rgba(6,43,99,0.06);
+    }
+
+    .loc-block-header {
+      background: var(--navy); padding:16px 24px;
+      display:flex; align-items:center; justify-content:space-between;
+    }
+    .loc-block-header h3 { font-size:16px; font-weight:800; color:#fff; }
+    .loc-block-header .meta { font-size:11px; color:rgba(255,255,255,0.5); margin-top:2px; }
+    .loc-block-header .pt-count {
+      background:var(--gold); color:var(--black); border-radius:20px;
+      padding:4px 12px; font-size:11px; font-weight:800;
+    }
+
+    .qr-grid {
+      display:grid; grid-template-columns:repeat(auto-fill, minmax(180px,1fr));
+      gap:16px; padding:20px;
+    }
+
+    .qr-card {
+      background:#f8faff; border:1.5px solid #e0e7ff; border-radius:12px;
+      padding:16px; text-align:center; transition:box-shadow 0.2s;
+    }
+    .qr-card:hover { box-shadow:0 4px 16px rgba(30,144,255,0.12); }
+
+    .qr-wrap {
+      background:#fff; border:1px solid #e5e7eb; border-radius:8px;
+      padding:8px; display:inline-block; margin-bottom:10px;
+    }
+    .qr-point { font-size:13px; font-weight:700; color:var(--navy); margin-bottom:3px; }
+    .qr-id    { font-size:10px; color:#aaa; font-family:monospace; }
+
+    /* Print view */
+    .print-section { display:none; }
+
+    @media print {
+      header, .page-header, .loc-block-header .pt-count { display:none !important; }
+      body { background:#fff; }
+      main { padding:0; }
+      .loc-block { border:none; box-shadow:none; margin-bottom:20px; }
+      .loc-block-header { background:#062B63; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+      .qr-grid { grid-template-columns:repeat(4,1fr); gap:10px; padding:10px; }
+      .qr-card { border:1px solid #ddd; }
+    }
+
+    .empty { text-align:center; padding:80px 20px; color:#bbb; font-size:14px; }
+    .spin {
+      width:32px; height:32px; border:3px solid #e0e7ff; border-top-color:var(--sky);
+      border-radius:50%; animation:sp 0.8s linear infinite; margin:0 auto 16px;
+    }
+    @keyframes sp { to { transform:rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="hd-left">
+    <div class="logo-box">JG</div>
+    <div class="hd-title">
+      <h1>JIVAC GROUP</h1>
+      <p>Patrol System · QR Codes</p>
+    </div>
+  </div>
+  <div class="nav-links">
+    <a href="index.html"        class="nav-link">Home</a>
+    <a href="admin.html"        class="nav-link">Admin</a>
+    <a href="qrcodes.html"      class="nav-link active">QR Codes</a>
+    <a href="control-room.html" class="nav-link">Control Room</a>
+  </div>
+</header>
+
+<main>
+  <div class="page-header">
+    <div>
+      <h2>All QR Codes</h2>
+      <p>Every location and their patrol point QR codes</p>
+    </div>
+    <button class="print-btn" onclick="window.print()">🖨 Print All QR Codes</button>
+  </div>
+
+  <div id="content">
+    <div class="empty"><div class="spin"></div>Loading locations and QR codes…</div>
+  </div>
+</main>
+
+<script>
+  const SUPA_URL  = 'https://mwqpdttawfnrugibjbbm.supabase.co';
+  const SUPA_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im13cXBkdHRhd2ZucnVnaWJqYmJtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE0NDAyMjEsImV4cCI6MjA5NjcxNjIyMX0.9CpFiqucvcBbkw2QrtrGwS4X4m1TXY2z4gs6HxYUtJc';
+  const SCAN_BASE = 'https://wizico-01.github.io/Jivac-patrol/scan.html';
+
+  async function get(path) {
+    const r = await fetch(`${SUPA_URL}/rest/v1/${path}`, {
+      headers: { 'apikey': SUPA_KEY, 'Authorization': `Bearer ${SUPA_KEY}` }
+    });
+    return r.json().catch(() => []);
+  }
+
+  async function load() {
+    const [locations, points] = await Promise.all([
+      get('locations?is_active=eq.true&order=name&select=*'),
+      get('patrol_points?order=created_at.asc&select=*')
+    ]);
+
+    const content = document.getElementById('content');
+
+    if (!locations || locations.length === 0) {
+      content.innerHTML = '<div class="empty">No active locations yet. Add them in the Admin panel.</div>';
+      return;
+    }
+
+    content.innerHTML = '';
+
+    locations.forEach((loc, li) => {
+      const locPoints = points.filter(p => p.location_id === loc.id);
+
+      const block = document.createElement('div');
+      block.className = 'loc-block';
+      block.innerHTML = `
+        <div class="loc-block-header">
+          <div>
+            <h3>${loc.name}</h3>
+            <div class="meta">${loc.address || 'No address'}</div>
+          </div>
+          <div class="pt-count">${locPoints.length} Point${locPoints.length!==1?'s':''}</div>
+        </div>
+        <div class="qr-grid" id="qr-grid-${li}"></div>`;
+      content.appendChild(block);
+
+      locPoints.forEach((pt, i) => {
+        const scanUrl = `${SCAN_BASE}?qr=${encodeURIComponent(pt.qr_code)}`;
+        const card = document.createElement('div');
+        card.className = 'qr-card';
+        const qid = `qr-${li}-${i}`;
+        card.innerHTML = `
+          <div class="qr-wrap"><div id="${qid}"></div></div>
+          <div class="qr-point">${pt.point_name}</div>
+          <div class="qr-id">${pt.qr_code}</div>`;
+        document.getElementById(`qr-grid-${li}`).appendChild(card);
+
+        setTimeout(() => {
+          new QRCode(document.getElementById(qid), {
+            text: scanUrl, width:140, height:140,
+            colorDark:'#062B63', colorLight:'#ffffff',
+            correctLevel: QRCode.CorrectLevel.H
+          });
+        }, 60 * (li * 10 + i));
+      });
+    });
+  }
+
+  load();
+</script>
+</body>
+</html>

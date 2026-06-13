@@ -28,7 +28,6 @@
       box-shadow: 0 32px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05);
     }
 
-    /* Header */
     .card-header {
       display: flex;
       align-items: center;
@@ -47,11 +46,9 @@
     }
     .brand-name { font-size: 15px; font-weight: 800; color: #111; letter-spacing: 1px; }
 
-    /* States */
     .state { display: none; }
     .state.active { display: block; }
 
-    /* Loading */
     #s-loading .ring {
       width: 60px; height: 60px;
       border: 5px solid #f0f0f0;
@@ -63,7 +60,6 @@
     @keyframes spin { to { transform:rotate(360deg); } }
     #s-loading p { color: #777; font-size: 15px; }
 
-    /* Success */
     .icon-circle {
       width: 80px; height: 80px;
       border-radius: 50%;
@@ -88,13 +84,8 @@
     .icon-circle.amber svg { stroke: #C9A24A; }
     .icon-circle.red   svg { stroke: #E52424; }
 
-    .state-title {
-      font-size: 22px; font-weight: 800; color: #111;
-      margin-bottom: 6px;
-    }
-    .state-sub {
-      font-size: 14px; color: #888; line-height: 1.5;
-    }
+    .state-title { font-size: 22px; font-weight: 800; color: #111; margin-bottom: 6px; }
+    .state-sub   { font-size: 14px; color: #888; line-height: 1.5; }
 
     .chip {
       display: inline-block;
@@ -103,10 +94,9 @@
       border-radius: 20px;
       font-size: 12px; font-weight: 700;
     }
-    .chip.blue   { background: #eef4ff; color: #0B4FAF; border:1px solid #c5d8fa; }
-    .chip.green  { background: #edfaf1; color: #2FA84F; border:1px solid #b3e8c3; }
+    .chip.blue  { background: #eef4ff; color: #0B4FAF; border:1px solid #c5d8fa; }
+    .chip.green { background: #edfaf1; color: #2FA84F; border:1px solid #b3e8c3; }
 
-    /* Point name highlight */
     .point-highlight { color: #0B4FAF; font-weight: 700; }
     .loc-highlight   { color: #888; }
 
@@ -176,10 +166,10 @@
 <footer>JIVAC GROUP · Patrol Management System</footer>
 
 <script>
-  // ── CONFIG ─────────────────────────────────────────
-  const SUPA_URL = window.JIVAC_CONFIG?.SUPABASE_URL      || 'YOUR_SUPABASE_URL';
-  const SUPA_KEY = window.JIVAC_CONFIG?.SUPABASE_ANON_KEY || 'YOUR_SUPABASE_ANON_KEY';
-  // ───────────────────────────────────────────────────
+  // ── CREDENTIALS ─────────────────────────────────────────────────
+  const SUPA_URL = 'https://mwqpdttawfnrugibjbbm.supabase.co';
+  const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im13cXBkdHRhd2ZucnVnaWJqYmJtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY3ODQwMTEsImV4cCI6MjA2MjM2MDAxMX0.9CpFiqucvcBbkw2QrtrGwS4X4m1TXY2z4gs6HxYUtJc';
+  // ────────────────────────────────────────────────────────────────
 
   function show(id) {
     document.querySelectorAll('.state').forEach(s => s.classList.remove('active'));
@@ -216,7 +206,6 @@
       const pt  = pts[0];
       const loc = pt.locations;
 
-      // Reject if location inactive
       if (!loc.is_active) { show('s-error'); return; }
 
       // 2. Check already scanned this hour
@@ -237,7 +226,7 @@
         qr_code:         qrCode
       });
 
-      // 4. Check if all points for this location scanned this hour
+      // 4. Check if all points scanned this hour
       const allScans = await db('GET',
         `scans?location_id=eq.${pt.location_id}&scanned_at=gte.${hourStart.toISOString()}&scanned_at=lte.${hourEnd.toISOString()}&select=patrol_point_id`
       );
@@ -245,7 +234,6 @@
       const unique = new Set(allScans.map(s => s.patrol_point_id));
 
       if (unique.size >= loc.total_points) {
-        // All points done — record completed round (avoid duplicate)
         const h     = now.getHours();
         const today = now.toISOString().split('T')[0];
 

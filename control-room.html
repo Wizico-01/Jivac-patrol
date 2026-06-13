@@ -8,31 +8,18 @@
     *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
 
     :root {
-      --navy:  #062B63;
-      --blue:  #0B4FAF;
-      --gold:  #C9A24A;
-      --white: #FFFFFF;
-      --black: #111111;
-      --green: #2FA84F;
-      --red:   #E52424;
-      --bg:    #060e1c;
+      --navy:  #062B63; --blue: #1565C0; --sky: #1E90FF;
+      --gold:  #C9A24A; --white: #FFFFFF; --black: #111111;
+      --green: #2FA84F; --red: #E52424; --bg: #f0f4ff;
     }
 
-    body {
-      font-family:'Segoe UI', system-ui, sans-serif;
-      background: var(--bg);
-      color: var(--white);
-      min-height: 100vh;
-    }
+    body { font-family:'Segoe UI',system-ui,sans-serif; background:var(--bg); color:var(--black); min-height:100vh; }
 
-    /* ── HEADER ── */
     header {
-      background: var(--navy);
-      border-bottom: 2px solid var(--gold);
-      height: 64px;
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 0 32px;
-      position: sticky; top: 0; z-index: 100;
+      background: var(--navy); border-bottom: 3px solid var(--gold);
+      height: 64px; display: flex; align-items: center; justify-content: space-between;
+      padding: 0 32px; position: sticky; top: 0; z-index: 100;
+      box-shadow: 0 2px 20px rgba(6,43,99,0.3);
     }
 
     .hd-left { display:flex; align-items:center; gap:12px; }
@@ -41,199 +28,131 @@
       display:flex; align-items:center; justify-content:center;
       font-weight:900; font-size:15px; color:var(--black);
     }
-    .hd-title h1 { font-size:16px; font-weight:800; letter-spacing:1.5px; }
+    .hd-title h1 { font-size:16px; font-weight:800; letter-spacing:1.5px; color:#fff; }
     .hd-title p  { font-size:9px; color:var(--gold); letter-spacing:2.5px; text-transform:uppercase; margin-top:1px; }
 
     .hd-right { display:flex; align-items:center; gap:16px; }
 
     .live-pill {
       display:flex; align-items:center; gap:7px;
-      background:rgba(47,168,79,0.12); border:1px solid rgba(47,168,79,0.35);
+      background:rgba(47,168,79,0.15); border:1px solid rgba(47,168,79,0.4);
       border-radius:20px; padding:5px 14px;
-      font-size:12px; font-weight:700; color:#2FA84F; letter-spacing:0.5px;
+      font-size:12px; font-weight:700; color:#2FA84F;
     }
-    .live-dot {
-      width:8px; height:8px; background:#2FA84F; border-radius:50%;
-      animation: blink 1.6s ease-in-out infinite;
-    }
+    .live-dot { width:8px; height:8px; background:#2FA84F; border-radius:50%; animation:blink 1.6s infinite; }
     @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
 
-    #clock {
-      font-size:15px; font-weight:700; color:rgba(255,255,255,0.5);
-      font-variant-numeric:tabular-nums; letter-spacing:1px;
-    }
+    #clock { font-size:15px; font-weight:700; color:rgba(255,255,255,0.5); font-variant-numeric:tabular-nums; }
 
     .nav-links { display:flex; gap:8px; }
     .nav-link {
       padding:7px 16px; border-radius:7px; font-size:12px; font-weight:600;
-      text-decoration:none; color:rgba(255,255,255,0.55);
+      text-decoration:none; color:rgba(255,255,255,0.6);
       border:1px solid transparent; transition:all 0.2s;
     }
-    .nav-link:hover { color:#fff; border-color:rgba(255,255,255,0.15); }
-    .nav-link.active { background:rgba(255,255,255,0.08); color:#fff; border-color:rgba(255,255,255,0.12); }
+    .nav-link:hover { color:#fff; border-color:rgba(255,255,255,0.3); }
+    .nav-link.active { background:rgba(255,255,255,0.15); color:#fff; border-color:rgba(255,255,255,0.2); }
 
-    /* ── MAIN ── */
     main { padding:32px; max-width:1280px; margin:0 auto; }
 
-    /* ── TOP STRIP ── */
-    .top-strip {
-      display:flex; align-items:center; justify-content:space-between;
-      margin-bottom:28px;
-    }
-    .top-strip h2 { font-size:20px; font-weight:800; }
-    .top-strip .sub { font-size:13px; color:rgba(255,255,255,0.35); margin-top:3px; }
+    .top-strip { display:flex; align-items:center; justify-content:space-between; margin-bottom:28px; }
+    .top-strip h2 { font-size:20px; font-weight:800; color:var(--navy); }
+    .top-strip .sub { font-size:13px; color:#888; margin-top:3px; }
 
     .refresh-btn {
-      background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1);
-      border-radius:8px; padding:8px 16px; color:rgba(255,255,255,0.5);
-      font-size:12px; font-weight:600; cursor:pointer; transition:all 0.2s;
+      background:#fff; border:1.5px solid #d1d9f0; border-radius:8px;
+      padding:8px 16px; color:var(--blue); font-size:12px; font-weight:700; cursor:pointer; transition:all 0.2s;
     }
-    .refresh-btn:hover { background:rgba(255,255,255,0.1); color:#fff; }
+    .refresh-btn:hover { border-color:var(--sky); box-shadow:0 4px 12px rgba(30,144,255,0.1); }
 
-    /* ── SUMMARY CARDS ── */
-    .summary-row {
-      display:grid; grid-template-columns:repeat(3,1fr); gap:14px;
-      margin-bottom:32px;
-    }
+    .summary-row { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:32px; }
     .sum-card {
-      background:rgba(255,255,255,0.04);
-      border:1px solid rgba(255,255,255,0.07);
-      border-radius:12px; padding:20px 22px;
+      background:#fff; border:1.5px solid #e0e7ff; border-radius:12px; padding:20px 22px;
+      box-shadow:0 2px 8px rgba(6,43,99,0.05);
     }
-    .sum-card .s-label {
-      font-size:10px; text-transform:uppercase; letter-spacing:1.5px;
-      color:rgba(255,255,255,0.35); margin-bottom:8px;
-    }
-    .sum-card .s-val { font-size:38px; font-weight:900; line-height:1; }
-    .sum-card.s-total  .s-val { color:var(--gold); }
+    .sum-card .s-label { font-size:10px; text-transform:uppercase; letter-spacing:1.5px; color:#999; margin-bottom:8px; }
+    .sum-card .s-val   { font-size:38px; font-weight:900; line-height:1; }
+    .sum-card.s-total  .s-val { color:var(--navy); }
     .sum-card.s-done   .s-val { color:var(--green); }
     .sum-card.s-missed .s-val { color:var(--red); }
 
-    /* ── SECTION LABEL ── */
     .sec-label {
-      font-size:11px; text-transform:uppercase; letter-spacing:2px;
-      color:rgba(255,255,255,0.28); margin-bottom:14px;
-      padding-bottom:8px; border-bottom:1px solid rgba(255,255,255,0.05);
+      font-size:11px; text-transform:uppercase; letter-spacing:2px; color:#999;
+      margin-bottom:14px; padding-bottom:8px; border-bottom:1.5px solid #e0e7ff;
     }
 
-    /* ── LOCATION GRID ── */
     .loc-grid {
-      display:grid;
-      grid-template-columns:repeat(auto-fill, minmax(260px, 1fr));
-      gap:14px;
-      margin-bottom:40px;
+      display:grid; grid-template-columns:repeat(auto-fill, minmax(260px,1fr));
+      gap:14px; margin-bottom:40px;
     }
 
     .loc-card {
       border-radius:14px; padding:22px 20px;
       display:flex; align-items:center; gap:16px;
-      position:relative; overflow:hidden;
-      transition:transform 0.2s;
+      position:relative; overflow:hidden; transition:transform 0.2s, box-shadow 0.2s;
+      background:#fff; border:1.5px solid #e0e7ff;
     }
-    .loc-card:hover { transform:translateY(-2px); }
+    .loc-card:hover { transform:translateY(-2px); box-shadow:0 8px 24px rgba(6,43,99,0.1); }
 
-    .loc-card.done {
-      background:rgba(47,168,79,0.07);
-      border:1.5px solid rgba(47,168,79,0.25);
-    }
-    .loc-card.missed {
-      background:rgba(229,36,36,0.05);
-      border:1.5px solid rgba(229,36,36,0.18);
-    }
+    .loc-card.done   { background:#f0fdf4; border-color:#86efac; }
+    .loc-card.missed { background:#fff5f5; border-color:#fca5a5; }
 
     .status-orb {
       width:54px; height:54px; border-radius:50%;
       display:flex; align-items:center; justify-content:center; flex-shrink:0;
     }
-    .loc-card.done   .status-orb { background:rgba(47,168,79,0.15); }
-    .loc-card.missed .status-orb { background:rgba(229,36,36,0.1); }
+    .loc-card.done   .status-orb { background:#dcfce7; }
+    .loc-card.missed .status-orb { background:#fee2e2; }
 
-    .status-orb svg {
-      width:26px; height:26px; fill:none; stroke-width:2.5;
-      stroke-linecap:round; stroke-linejoin:round;
-    }
+    .status-orb svg { width:26px; height:26px; fill:none; stroke-width:2.5; stroke-linecap:round; stroke-linejoin:round; }
     .loc-card.done   .status-orb svg { stroke:var(--green); }
     .loc-card.missed .status-orb svg { stroke:var(--red); }
 
     .loc-info { flex:1; min-width:0; }
-    .loc-info .l-name {
-      font-size:15px; font-weight:700;
-      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-      margin-bottom:4px;
-    }
-    .loc-info .l-status {
-      font-size:12px; font-weight:700; letter-spacing:0.3px;
-    }
+    .loc-info .l-name { font-size:15px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-bottom:4px; color:var(--navy); }
+    .loc-info .l-status { font-size:12px; font-weight:700; }
     .loc-card.done   .l-status { color:var(--green); }
-    .loc-card.missed .l-status { color:rgba(229,36,36,0.8); }
+    .loc-card.missed .l-status { color:var(--red); }
+    .loc-info .l-pts { font-size:11px; color:#aaa; margin-top:2px; }
 
-    .loc-info .l-pts {
-      font-size:11px; color:rgba(255,255,255,0.28); margin-top:2px;
-    }
-
-    /* rounds-today badge */
     .rounds-today {
       position:absolute; top:10px; right:12px;
-      background:rgba(255,255,255,0.05); border-radius:8px;
-      padding:2px 8px; font-size:10px; color:rgba(255,255,255,0.3); font-weight:600;
+      background:rgba(6,43,99,0.06); border-radius:8px;
+      padding:2px 8px; font-size:10px; color:#999; font-weight:600;
     }
 
-    /* ── LOG TABLE ── */
     .log-box {
-      background:rgba(255,255,255,0.025);
-      border:1px solid rgba(255,255,255,0.06);
-      border-radius:12px; overflow:hidden;
+      background:#fff; border:1.5px solid #e0e7ff; border-radius:12px; overflow:hidden;
+      box-shadow:0 2px 8px rgba(6,43,99,0.05);
     }
-    .log-box-header {
-      padding:14px 20px;
-      border-bottom:1px solid rgba(255,255,255,0.06);
-      font-size:13px; font-weight:700; color:rgba(255,255,255,0.6);
-    }
+    .log-box-header { padding:14px 20px; border-bottom:1px solid #e0e7ff; font-size:13px; font-weight:700; color:var(--navy); }
     table { width:100%; border-collapse:collapse; }
-    thead th {
-      padding:10px 20px; font-size:10px; text-transform:uppercase;
-      letter-spacing:1.5px; color:rgba(255,255,255,0.25); text-align:left;
-      background:rgba(255,255,255,0.02);
-    }
-    tbody tr { border-top:1px solid rgba(255,255,255,0.04); transition:background 0.15s; }
-    tbody tr:hover { background:rgba(255,255,255,0.025); }
-    tbody td { padding:13px 20px; font-size:13px; color:rgba(255,255,255,0.7); }
+    thead th { padding:10px 20px; font-size:10px; text-transform:uppercase; letter-spacing:1.5px; color:#999; text-align:left; background:#f8faff; }
+    tbody tr { border-top:1px solid #f0f4ff; transition:background 0.15s; }
+    tbody tr:hover { background:#f8faff; }
+    tbody td { padding:13px 20px; font-size:13px; color:#444; }
 
-    .pill {
-      display:inline-flex; align-items:center; gap:5px;
-      padding:3px 11px; border-radius:20px;
-      font-size:11px; font-weight:700;
-    }
-    .pill.done   { background:rgba(47,168,79,0.1); color:#2FA84F; border:1px solid rgba(47,168,79,0.2); }
-    .pill.missed { background:rgba(229,36,36,0.07); color:#E52424; border:1px solid rgba(229,36,36,0.18); }
+    .pill { display:inline-flex; align-items:center; gap:5px; padding:3px 11px; border-radius:20px; font-size:11px; font-weight:700; }
+    .pill.done { background:#f0fdf4; color:var(--green); border:1px solid #86efac; }
 
-    /* empty / loading */
-    .empty {
-      text-align:center; padding:48px 20px;
-      color:rgba(255,255,255,0.18); font-size:14px;
-    }
-    .spin-sm {
-      width:28px; height:28px; border:3px solid rgba(255,255,255,0.08);
-      border-top-color:var(--gold); border-radius:50%;
-      animation:rotating 0.8s linear infinite; margin:0 auto 12px;
-    }
-    @keyframes rotating { to { transform:rotate(360deg); } }
+    .empty { text-align:center; padding:48px 20px; color:#bbb; font-size:14px; }
+    .spin-sm { width:28px; height:28px; border:3px solid #e0e7ff; border-top-color:var(--sky); border-radius:50%; animation:rot 0.8s linear infinite; margin:0 auto 12px; }
+    @keyframes rot { to { transform:rotate(360deg); } }
 
     @media (max-width:768px) {
       main { padding:20px 14px; }
       header { padding:0 14px; }
-      #clock, .nav-links { display:none; }
-      .summary-row { grid-template-columns:repeat(3,1fr); gap:8px; }
+      #clock { display:none; }
+      .summary-row { gap:8px; }
       .sum-card .s-val { font-size:28px; }
     }
   </style>
-  <script src="config.html"></script>
 </head>
 <body>
 
 <header>
   <div class="hd-left">
-    <div class="logo-box">JG</div>>
+    <div class="logo-box">JG</div>
     <div class="hd-title">
       <h1>JIVAC GROUP</h1>
       <p>Control Room · Live Patrol Monitor</p>
@@ -241,8 +160,9 @@
   </div>
   <div class="hd-right">
     <div class="nav-links">
-      <a href="index.html" class="nav-link">Home</a>
-    <a href="admin.html"        class="nav-link">Admin</a>
+      <a href="index.html"        class="nav-link">Home</a>
+      <a href="admin.html"        class="nav-link">Admin</a>
+      <a href="qrcodes.html"      class="nav-link">QR Codes</a>
       <a href="control-room.html" class="nav-link active">Control Room</a>
     </div>
     <div class="live-pill"><div class="live-dot"></div>LIVE</div>
@@ -284,12 +204,7 @@
     <div class="log-box-header">Patrol Round Log — Today</div>
     <table>
       <thead>
-        <tr>
-          <th>Location</th>
-          <th>Hour</th>
-          <th>Status</th>
-          <th>Completed</th>
-        </tr>
+        <tr><th>Location</th><th>Hour</th><th>Status</th><th>Completed</th></tr>
       </thead>
       <tbody id="log-body">
         <tr><td colspan="4"><div class="empty"><div class="spin-sm"></div>Loading…</div></td></tr>
@@ -299,35 +214,23 @@
 </main>
 
 <script>
-  // ── CONFIG ────────────────────────────────────────────────
-  const SUPA_URL = window.JIVAC_CONFIG?.SUPABASE_URL      || 'YOUR_SUPABASE_URL';
-  const SUPA_KEY = window.JIVAC_CONFIG?.SUPABASE_ANON_KEY || 'YOUR_SUPABASE_ANON_KEY';
+  const SUPA_URL = 'https://mwqpdttawfnrugibjbbm.supabase.co';
+  const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im13cXBkdHRhd2ZucnVnaWJqYmJtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE0NDAyMjEsImV4cCI6MjA5NjcxNjIyMX0.9CpFiqucvcBbkw2QrtrGwS4X4m1TXY2z4gs6HxYUtJc';
   const REFRESH  = 30000;
-  // ─────────────────────────────────────────────────────────
 
-  // Clock
   function tick() {
-    const n = new Date();
-    document.getElementById('clock').textContent =
-      n.toLocaleTimeString('en-NG', { hour12:false });
+    document.getElementById('clock').textContent = new Date().toLocaleTimeString('en-NG',{hour12:false});
   }
   tick(); setInterval(tick, 1000);
 
-  // Dates
   function setDateLabels() {
     const n = new Date();
     const days   = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-    const months = ['January','February','March','April','May','June','July',
-                    'August','September','October','November','December'];
-    document.getElementById('date-str').textContent =
-      `${days[n.getDay()]}, ${n.getDate()} ${months[n.getMonth()]} ${n.getFullYear()}`;
-
+    const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    document.getElementById('date-str').textContent = `${days[n.getDay()]}, ${n.getDate()} ${months[n.getMonth()]} ${n.getFullYear()}`;
     const h = n.getHours();
-    const fmt = (h) => {
-      const s = h%12||12; return `${s}:00 ${h>=12?'PM':'AM'}`;
-    };
-    document.getElementById('hour-str').textContent =
-      `Hour window: ${fmt(h)} – ${fmt(h)}59`;
+    const fmt = h => { const s=h%12||12; return `${s}:00 ${h>=12?'PM':'AM'}`; };
+    document.getElementById('hour-str').textContent = `Hour window: ${fmt(h)} – ${fmt(h)}:59`;
   }
   setDateLabels();
 
@@ -339,19 +242,15 @@
     return r.json().catch(() => []);
   }
 
-  function fmtHour(h) {
-    const s = h%12||12; const suf = h>=12?'PM':'AM';
-    return `${s}:00 ${suf} – ${s}:59 ${suf}`;
-  }
-
+  function fmtHour(h) { const s=h%12||12; const sf=h>=12?'PM':'AM'; return `${s}:00 ${sf} – ${s}:59 ${sf}`; }
   function fmtTime(iso) {
     if (!iso) return '—';
     return new Date(iso).toLocaleTimeString('en-NG',{hour:'2-digit',minute:'2-digit',hour12:true});
   }
 
   async function load() {
-    const now  = new Date();
-    const h    = now.getHours();
+    const now   = new Date();
+    const h     = now.getHours();
     const today = now.toISOString().split('T')[0];
 
     const [locations, completedThisHour, todayRounds] = await Promise.all([
@@ -361,84 +260,64 @@
     ]);
 
     const doneIds = new Set(completedThisHour.map(r => r.location_id));
+    const total   = locations.length;
+    const done    = locations.filter(l => doneIds.has(l.id)).length;
 
-    // Summary
-    const total  = locations.length;
-    const done   = locations.filter(l => doneIds.has(l.id)).length;
-    const missed = total - done;
     document.getElementById('s-total').textContent  = total;
     document.getElementById('s-done').textContent   = done;
-    document.getElementById('s-missed').textContent = missed;
+    document.getElementById('s-missed').textContent = total - done;
 
-    // Location grid
     const grid = document.getElementById('loc-grid');
     if (locations.length === 0) {
       grid.innerHTML = '<div class="empty">No active locations. Add them in the Admin panel.</div>';
     } else {
       const roundsByLoc = {};
-      todayRounds.forEach(r => {
-        roundsByLoc[r.location_id] = (roundsByLoc[r.location_id] || 0) + 1;
-      });
+      todayRounds.forEach(r => { roundsByLoc[r.location_id] = (roundsByLoc[r.location_id]||0)+1; });
 
       grid.innerHTML = locations.map(l => {
         const isDone = doneIds.has(l.id);
         const rounds = roundsByLoc[l.id] || 0;
         return `
-          <div class="loc-card ${isDone ? 'done' : 'missed'}">
+          <div class="loc-card ${isDone?'done':'missed'}">
             <div class="status-orb">
               ${isDone
                 ? `<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>`
-                : `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/>
-                   <line x1="12" y1="8" x2="12" y2="12"/>
-                   <line x1="12" y1="16" x2="12.01" y2="16"/></svg>`
-              }
+                : `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`}
             </div>
             <div class="loc-info">
               <div class="l-name">${l.name}</div>
               <div class="l-status">${isDone ? '✓ Completed' : '✗ No Patrol'}</div>
               <div class="l-pts">${l.total_points} point${l.total_points!==1?'s':''}</div>
             </div>
-            ${rounds > 0 ? `<div class="rounds-today">${rounds} round${rounds>1?'s':''} today</div>` : ''}
+            ${rounds>0 ? `<div class="rounds-today">${rounds} round${rounds>1?'s':''} today</div>` : ''}
           </div>`;
       }).join('');
     }
 
-    // Log table
     const tbody = document.getElementById('log-body');
     if (todayRounds.length === 0) {
       tbody.innerHTML = '<tr><td colspan="4"><div class="empty">No completed patrols recorded today yet.</div></td></tr>';
     } else {
       tbody.innerHTML = todayRounds.map(r => `
         <tr>
-          <td>${r.locations?.name || '—'}</td>
+          <td>${r.locations?.name||'—'}</td>
           <td>${fmtHour(r.hour_window)}</td>
           <td><span class="pill done">✓ Completed</span></td>
           <td>${fmtTime(r.completed_at)}</td>
-        </tr>
-      `).join('');
+        </tr>`).join('');
     }
   }
 
   load();
   setInterval(load, REFRESH);
 
-  // Realtime via Supabase WebSocket
   (() => {
     try {
-      const ws = new WebSocket(
-        `${SUPA_URL.replace('https://','wss://')}/realtime/v1/websocket?apikey=${SUPA_KEY}&vsn=1.0.0`
-      );
-      ws.onopen = () => ws.send(JSON.stringify({
-        topic:'realtime:public:patrol_rounds', event:'phx_join', payload:{}, ref:'1'
-      }));
-      ws.onmessage = e => {
-        const m = JSON.parse(e.data);
-        if (m.event === 'INSERT' || m.event === 'UPDATE') load();
-      };
+      const ws = new WebSocket(`${SUPA_URL.replace('https://','wss://')}/realtime/v1/websocket?apikey=${SUPA_KEY}&vsn=1.0.0`);
+      ws.onopen = () => ws.send(JSON.stringify({topic:'realtime:public:patrol_rounds',event:'phx_join',payload:{},ref:'1'}));
+      ws.onmessage = e => { const m=JSON.parse(e.data); if(m.event==='INSERT'||m.event==='UPDATE') load(); };
     } catch(_) {}
   })();
 </script>
-
-<script src="config.html"></script>
 </body>
 </html>

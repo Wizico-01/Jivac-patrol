@@ -3,15 +3,13 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>JIVAC Admin — Locations & QR Codes</title>
+  <title>JIVAC Admin, Locations & QR Codes</title>
   <script>
-    // ── PASTE YOUR SUPABASE CREDENTIALS HERE ──────────────────────
     window.JIVAC_CONFIG = {
-      SUPABASE_URL:      'https://mwqpdttawfnrugibjbbm.supabase.co',       // e.g. https://abcxyz.supabase.co
-      SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im13cXBkdHRhd2ZucnVnaWJqYmJtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExNDAyMjEsImV4cCI6MjA5NjcxNjIyMX0.9CpFiqucvcBbkw2QrtrGwS4X4m1TXY2z4gs6HxYUtJc',  // starts with eyJ...
-      SCAN_BASE_URL: 'https://wizico-01.github.io/Jivac-patrol/', // change to Vercel URL after deploy
+      SUPABASE_URL:      'https://mwqpdttawfnrugibjbbm.supabase.co',
+      SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im13cXBkdHRhd2ZucnVnaWJqYmJtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE0NDAyMjEsImV4cCI6MjA5NjcxNjIyMX0.9CpFiqucvcBbkw2QrtrGwS4X4m1TXY2z4gs6HxYUtJc',
+      SCAN_BASE_URL:     'https://wizico-01.github.io/Jivac-patrol/scan.html',
     };
-    // ─────────────────────────────────────────────────────────────
   </script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <style>
@@ -19,35 +17,36 @@
 
     :root {
       --navy:  #062B63;
-      --blue:  #0B4FAF;
+      --blue:  #1565C0;
+      --sky:   #1E90FF;
       --gold:  #C9A24A;
       --white: #FFFFFF;
       --black: #111111;
       --green: #2FA84F;
       --red:   #E52424;
-      --bg:    #07101f;
-      --surface: rgba(255,255,255,0.045);
-      --border:  rgba(255,255,255,0.09);
+      --bg:    #f0f4ff;
+      --surface: #ffffff;
+      --border:  #e0e7ff;
     }
 
-    body { font-family:'Segoe UI',system-ui,sans-serif; background:var(--bg); color:var(--white); min-height:100vh; }
+    body { font-family:'Segoe UI',system-ui,sans-serif; background:var(--bg); color:var(--black); min-height:100vh; }
 
     header {
       background: var(--navy);
-      border-bottom: 2px solid var(--gold);
+      border-bottom: 3px solid var(--gold);
       height: 64px;
       display: flex; align-items: center; justify-content: space-between;
       padding: 0 32px;
       position: sticky; top:0; z-index:200;
+      box-shadow: 0 2px 20px rgba(6,43,99,0.3);
     }
     .hd-left { display:flex; align-items:center; gap:12px; }
     .logo-box {
       width:40px; height:40px; background:var(--gold); border-radius:7px;
       display:flex; align-items:center; justify-content:center;
-      font-weight:900; font-size:15px; color:var(--black); letter-spacing:-1px;
+      font-weight:900; font-size:15px; color:var(--black);
     }
-    .logo-box span { pointer-events:none; }
-    .hd-title h1 { font-size:16px; font-weight:800; letter-spacing:1.5px; }
+    .hd-title h1 { font-size:16px; font-weight:800; letter-spacing:1.5px; color:#fff; }
     .hd-title p  { font-size:9px; color:var(--gold); letter-spacing:2.5px; text-transform:uppercase; margin-top:1px; }
 
     .nav-links { display:flex; gap:8px; }
@@ -56,120 +55,121 @@
       text-decoration:none; color:rgba(255,255,255,0.6);
       border:1px solid transparent; transition:all 0.2s;
     }
-    .nav-link:hover { color:#fff; border-color:rgba(255,255,255,0.15); }
-    .nav-link.active { background:rgba(255,255,255,0.08); color:#fff; border-color:rgba(255,255,255,0.12); }
+    .nav-link:hover { color:#fff; border-color:rgba(255,255,255,0.3); }
+    .nav-link.active { background:rgba(255,255,255,0.15); color:#fff; border-color:rgba(255,255,255,0.2); }
 
     .page { display:grid; grid-template-columns:380px 1fr; min-height:calc(100vh - 64px); }
 
     .left-panel {
-      background: rgba(6,43,99,0.25);
+      background: #ffffff;
       border-right: 1px solid var(--border);
       padding: 28px 24px;
       overflow-y: auto;
+      box-shadow: 2px 0 12px rgba(6,43,99,0.06);
     }
 
     .panel-title {
       font-size:11px; text-transform:uppercase; letter-spacing:2px;
-      color:rgba(255,255,255,0.35); margin-bottom:16px;
+      color:#999; margin-bottom:16px;
     }
 
     .add-form {
-      background: var(--surface);
-      border: 1px solid var(--border);
+      background: #f8faff;
+      border: 1.5px solid var(--border);
       border-radius:12px;
       padding:20px;
       margin-bottom:24px;
     }
-    .add-form h3 { font-size:14px; font-weight:700; margin-bottom:16px; color:rgba(255,255,255,0.85); }
+    .add-form h3 { font-size:14px; font-weight:700; margin-bottom:16px; color:var(--navy); }
 
     .field { margin-bottom:14px; }
-    .field label { display:block; font-size:11px; text-transform:uppercase; letter-spacing:1px; color:rgba(255,255,255,0.4); margin-bottom:6px; }
+    .field label { display:block; font-size:11px; text-transform:uppercase; letter-spacing:1px; color:#666; margin-bottom:6px; }
     .field input {
-      width:100%; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1);
-      border-radius:8px; padding:9px 13px; font-size:13px; color:#fff; outline:none;
+      width:100%; background:#fff; border:1.5px solid #d1d9f0;
+      border-radius:8px; padding:9px 13px; font-size:13px; color:#111; outline:none;
       transition:border-color 0.2s;
     }
-    .field input:focus { border-color:var(--gold); }
-    .field-hint { font-size:11px; color:rgba(255,255,255,0.25); margin-top:4px; line-height:1.4; }
+    .field input:focus { border-color:var(--sky); box-shadow: 0 0 0 3px rgba(30,144,255,0.1); }
+    .field-hint { font-size:11px; color:#999; margin-top:4px; line-height:1.4; }
 
     .points-builder { margin-bottom:14px; }
-    .points-builder label { display:block; font-size:11px; text-transform:uppercase; letter-spacing:1px; color:rgba(255,255,255,0.4); margin-bottom:8px; }
+    .points-builder label { display:block; font-size:11px; text-transform:uppercase; letter-spacing:1px; color:#666; margin-bottom:8px; }
 
     .point-row { display:flex; align-items:center; gap:8px; margin-bottom:8px; }
     .point-num {
-      width:26px; height:26px; background:rgba(201,162,74,0.15); border:1px solid rgba(201,162,74,0.3);
-      border-radius:6px; display:flex; align-items:center; justify-content:center;
+      width:26px; height:26px; background:var(--navy); border-radius:6px;
+      display:flex; align-items:center; justify-content:center;
       font-size:11px; font-weight:700; color:var(--gold); flex-shrink:0;
     }
     .point-input {
-      flex:1; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1);
-      border-radius:7px; padding:8px 12px; font-size:13px; color:#fff; outline:none;
+      flex:1; background:#fff; border:1.5px solid #d1d9f0;
+      border-radius:7px; padding:8px 12px; font-size:13px; color:#111; outline:none;
       transition:border-color 0.2s;
     }
-    .point-input:focus { border-color:var(--gold); }
+    .point-input:focus { border-color:var(--sky); }
     .del-point {
-      width:28px; height:28px; background:rgba(229,36,36,0.1); border:1px solid rgba(229,36,36,0.2);
+      width:28px; height:28px; background:#fff0f0; border:1px solid #fca5a5;
       border-radius:6px; display:flex; align-items:center; justify-content:center;
       cursor:pointer; color:var(--red); font-size:16px; flex-shrink:0; transition:background 0.2s;
     }
-    .del-point:hover { background:rgba(229,36,36,0.2); }
+    .del-point:hover { background:#fee2e2; }
 
     .add-point-btn {
-      width:100%; padding:8px; background:rgba(255,255,255,0.04);
-      border:1px dashed rgba(255,255,255,0.15); border-radius:8px;
-      color:rgba(255,255,255,0.4); font-size:12px; cursor:pointer;
+      width:100%; padding:8px; background:#f0f4ff;
+      border:1.5px dashed #93b4ff; border-radius:8px;
+      color:var(--blue); font-size:12px; font-weight:600; cursor:pointer;
       transition:all 0.2s; margin-top:4px;
     }
-    .add-point-btn:hover { background:rgba(255,255,255,0.08); color:#fff; }
+    .add-point-btn:hover { background:#dbeafe; }
 
     .btn {
       display:inline-flex; align-items:center; justify-content:center; gap:8px;
       padding:10px 20px; border-radius:8px; border:none;
-      font-size:13px; font-weight:700; cursor:pointer; transition:opacity 0.2s, transform 0.1s;
+      font-size:13px; font-weight:700; cursor:pointer; transition:all 0.2s;
       width:100%;
     }
-    .btn:hover { opacity:0.88; }
-    .btn:active { transform:scale(0.98); }
-    .btn-gold  { background:var(--gold); color:var(--black); }
-    .btn-ghost { background:transparent; color:rgba(255,255,255,0.5); border:1px solid rgba(255,255,255,0.12); width:auto; padding:7px 14px; font-size:11px; }
-    .btn-danger { background:rgba(229,36,36,0.15); color:var(--red); border:1px solid rgba(229,36,36,0.25); width:auto; padding:7px 14px; font-size:11px; }
+    .btn-gold  { background:var(--gold); color:var(--black); box-shadow:0 4px 12px rgba(201,162,74,0.3); }
+    .btn-gold:hover { box-shadow:0 6px 16px rgba(201,162,74,0.4); transform:translateY(-1px); }
+    .btn-ghost { background:#fff; color:#555; border:1.5px solid #d1d9f0; width:auto; padding:7px 14px; font-size:11px; }
+    .btn-ghost:hover { border-color:var(--sky); color:var(--sky); }
+    .btn-danger { background:#fff0f0; color:var(--red); border:1px solid #fca5a5; width:auto; padding:7px 14px; font-size:11px; }
+    .btn-danger:hover { background:#fee2e2; }
 
     .loc-list { display:flex; flex-direction:column; gap:10px; }
     .loc-item {
-      background: var(--surface); border: 1px solid var(--border);
+      background: #fff; border: 1.5px solid var(--border);
       border-radius:10px; padding:14px 16px; cursor:pointer; transition:all 0.2s;
     }
-    .loc-item:hover { border-color:rgba(201,162,74,0.3); }
-    .loc-item.selected { border-color:var(--gold); background:rgba(201,162,74,0.06); }
-    .loc-item.inactive { opacity:0.45; }
+    .loc-item:hover { border-color:var(--sky); box-shadow:0 4px 12px rgba(30,144,255,0.1); }
+    .loc-item.selected { border-color:var(--sky); background:#f0f8ff; }
+    .loc-item.inactive { opacity:0.5; }
     .loc-item-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; }
-    .loc-name { font-size:14px; font-weight:700; }
+    .loc-name { font-size:14px; font-weight:700; color:var(--navy); }
     .active-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
     .active-dot.on  { background:var(--green); }
-    .active-dot.off { background:rgba(255,255,255,0.2); }
-    .loc-meta { font-size:11px; color:rgba(255,255,255,0.35); }
+    .active-dot.off { background:#ccc; }
+    .loc-meta { font-size:11px; color:#888; }
     .loc-actions { display:flex; gap:6px; margin-top:10px; }
 
-    .right-panel { padding:32px; overflow-y:auto; }
+    .right-panel { padding:32px; overflow-y:auto; background:#f8faff; }
     .empty-right {
       height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center;
-      color:rgba(255,255,255,0.15); text-align:center; gap:12px;
+      color:#ccc; text-align:center; gap:12px;
     }
-    .empty-right svg { opacity:0.2; }
     .empty-right p { font-size:14px; }
 
     .loc-detail-header {
       display:flex; align-items:flex-start; justify-content:space-between;
       margin-bottom:28px; gap:16px;
     }
-    .loc-detail-header h2 { font-size:22px; font-weight:800; }
-    .loc-detail-header .address { font-size:13px; color:rgba(255,255,255,0.4); margin-top:4px; }
+    .loc-detail-header h2 { font-size:22px; font-weight:800; color:var(--navy); }
+    .loc-detail-header .address { font-size:13px; color:#888; margin-top:4px; }
     .detail-actions { display:flex; gap:8px; flex-shrink:0; }
 
     .section-label {
       font-size:11px; text-transform:uppercase; letter-spacing:2px;
-      color:rgba(255,255,255,0.3); margin-bottom:14px;
-      padding-bottom:8px; border-bottom:1px solid rgba(255,255,255,0.06);
+      color:#999; margin-bottom:14px;
+      padding-bottom:8px; border-bottom:1.5px solid var(--border);
     }
 
     .qr-grid {
@@ -177,23 +177,24 @@
       gap:16px; margin-bottom:40px;
     }
     .qr-card-screen {
-      background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1);
+      background:#fff; border:1.5px solid var(--border);
       border-radius:12px; padding:16px; text-align:center;
+      box-shadow:0 2px 8px rgba(6,43,99,0.06);
     }
     .qr-canvas-wrap {
       background:#fff; border-radius:8px; padding:10px;
-      display:inline-block; margin-bottom:10px;
+      display:inline-block; margin-bottom:10px; border:1px solid #e5e7eb;
     }
-    .qr-point-name { font-size:13px; font-weight:700; color:#fff; margin-bottom:2px; }
-    .qr-code-id { font-size:10px; color:rgba(255,255,255,0.3); font-family:monospace; }
+    .qr-point-name { font-size:13px; font-weight:700; color:var(--navy); margin-bottom:2px; }
+    .qr-code-id { font-size:10px; color:#aaa; font-family:monospace; }
 
     @media print {
       header, .left-panel, .loc-detail-header, .section-label,
       .detail-actions, .btn, .nav-links { display:none !important; }
-      body { background:#fff; color:#000; }
+      body { background:#fff; }
       .page { display:block; }
-      .right-panel { padding:10px; }
-      .qr-grid { display:grid; grid-template-columns:repeat(3, 1fr); gap:12px; }
+      .right-panel { padding:10px; background:#fff; }
+      .qr-grid { grid-template-columns:repeat(3, 1fr); gap:12px; }
       .qr-card-screen { display:none; }
       .print-cards { display:block !important; }
     }
@@ -213,7 +214,6 @@
       font-weight:900; font-size:11px; color:#C9A24A;
     }
     .print-brand { font-size:12px; font-weight:800; color:#111; letter-spacing:1px; }
-    .print-card .print-qr { margin:0 auto 10px; }
     .print-card .print-point { font-size:16px; font-weight:800; color:#062B63; margin-bottom:2px; }
     .print-card .print-loc   { font-size:12px; color:#888; margin-bottom:8px; }
     .print-card .print-code  { font-size:10px; font-family:monospace; background:#f5f5f5; padding:3px 8px; border-radius:4px; color:#aaa; display:inline-block; }
@@ -221,13 +221,13 @@
 
     #toast {
       position:fixed; bottom:32px; left:50%; transform:translateX(-50%) translateY(20px);
-      background:rgba(30,50,80,0.95); border:1px solid rgba(255,255,255,0.15);
+      background:var(--navy); border:1px solid rgba(255,255,255,0.2);
       color:#fff; padding:12px 24px; border-radius:10px; font-size:13px; font-weight:600;
       opacity:0; transition:all 0.3s; z-index:999; pointer-events:none;
     }
     #toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
-    #toast.success { border-color:rgba(47,168,79,0.5); color:#2FA84F; }
-    #toast.error   { border-color:rgba(229,36,36,0.4); color:var(--red); }
+    #toast.success { border-color:rgba(47,168,79,0.5); color:#4ade80; }
+    #toast.error   { border-color:rgba(229,36,36,0.4); color:#f87171; }
 
     .spin {
       width:16px; height:16px; border:2px solid rgba(255,255,255,0.2);
@@ -246,7 +246,7 @@
 
 <header>
   <div class="hd-left">
-    <div class="logo-box"><span>JG</span></div>
+    <div class="logo-box">JG</div>
     <div class="hd-title">
       <h1>JIVAC GROUP</h1>
       <p>Patrol System · Admin</p>
@@ -255,13 +255,12 @@
   <div class="nav-links">
     <a href="index.html"        class="nav-link">Home</a>
     <a href="admin.html"        class="nav-link active">Admin</a>
+    <a href="qrcodes.html"      class="nav-link">QR Codes</a>
     <a href="control-room.html" class="nav-link">Control Room</a>
-    <a href="scan.html"         class="nav-link">Scan Page</a>
   </div>
 </header>
 
 <div class="page">
-
   <div class="left-panel">
     <div class="add-form">
       <h3>Add New Location</h3>
@@ -270,14 +269,14 @@
         <input type="text" id="inp-loc-name" placeholder="e.g. Access Bank Lekki Branch" />
       </div>
       <div class="field">
-        <label>Address <span style="color:rgba(255,255,255,0.25)">(optional)</span></label>
+        <label>Address <span style="color:#bbb">(optional)</span></label>
         <input type="text" id="inp-loc-address" placeholder="e.g. 15 Admiralty Way, Lekki" />
       </div>
       <div class="points-builder">
         <label>Patrol / Clocking Points</label>
         <div id="points-list"></div>
         <button class="add-point-btn" onclick="addPointRow()">+ Add Another Point</button>
-        <div class="field-hint" style="margin-top:8px;">Add each clocking point. A unique QR code is generated for each one.</div>
+        <div class="field-hint" style="margin-top:8px;">Each point gets its own unique QR code.</div>
       </div>
       <button class="btn btn-gold" onclick="saveLocation()" id="save-btn">
         Save Location & Generate QR Codes
@@ -286,8 +285,8 @@
 
     <div class="panel-title">Your Locations</div>
     <div class="loc-list" id="loc-list">
-      <div style="text-align:center;padding:30px;color:rgba(255,255,255,0.2);font-size:13px;">
-        <div class="spin" style="margin:0 auto 10px;border-top-color:rgba(255,255,255,0.3)"></div>
+      <div style="text-align:center;padding:30px;color:#bbb;font-size:13px;">
+        <div class="spin" style="margin:0 auto 10px;border-top-color:#93b4ff;width:20px;height:20px;border-color:#e0e7ff;border-top-color:var(--sky)"></div>
         Loading...
       </div>
     </div>
@@ -295,7 +294,7 @@
 
   <div class="right-panel" id="right-panel">
     <div class="empty-right">
-      <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+      <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#ddd" stroke-width="1.5">
         <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
         <rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="3" height="3"/>
         <rect x="19" y="14" width="2" height="2"/><rect x="14" y="19" width="2" height="2"/>
@@ -304,17 +303,14 @@
       <p>Select a location to view its QR codes</p>
     </div>
   </div>
-
 </div>
 
 <div id="toast"></div>
 
 <script>
-  // ── READ CONFIG ──────────────────────────────────────────────────
   const SUPA_URL  = window.JIVAC_CONFIG.SUPABASE_URL;
   const SUPA_KEY  = window.JIVAC_CONFIG.SUPABASE_ANON_KEY;
   const SCAN_BASE = window.JIVAC_CONFIG.SCAN_BASE_URL;
-  // ────────────────────────────────────────────────────────────────
 
   let selectedLocId = null;
 
@@ -322,8 +318,7 @@
     const r = await fetch(`${SUPA_URL}/rest/v1/${path}`, {
       method,
       headers: {
-        'apikey': SUPA_KEY,
-        'Authorization': `Bearer ${SUPA_KEY}`,
+        'apikey': SUPA_KEY, 'Authorization': `Bearer ${SUPA_KEY}`,
         'Content-Type': 'application/json',
         'Prefer': method==='POST' ? 'return=representation' : ''
       },
@@ -335,8 +330,7 @@
 
   function toast(msg, type='success') {
     const t = document.getElementById('toast');
-    t.textContent = msg;
-    t.className = `show ${type}`;
+    t.textContent = msg; t.className = `show ${type}`;
     setTimeout(() => t.className = '', 3000);
   }
 
@@ -345,13 +339,11 @@
   function addPointRow(value='') {
     pointCount++;
     const div = document.createElement('div');
-    div.className = 'point-row';
-    div.id = `pr-${pointCount}`;
+    div.className = 'point-row'; div.id = `pr-${pointCount}`;
     div.innerHTML = `
       <div class="point-num">${pointCount}</div>
       <input class="point-input" type="text" placeholder="e.g. Main Gate" value="${value}" />
-      <div class="del-point" onclick="removePoint('pr-${pointCount}')">×</div>
-    `;
+      <div class="del-point" onclick="removePoint('pr-${pointCount}')">×</div>`;
     document.getElementById('points-list').appendChild(div);
     div.querySelector('input').focus();
   }
@@ -400,8 +392,7 @@
       const loc = Array.isArray(locs) ? locs[0] : locs;
 
       const pointRows = points.map((pName, i) => ({
-        location_id: loc.id,
-        point_name: pName,
+        location_id: loc.id, point_name: pName,
         qr_code: makeQrCode(name, pName, i + 1)
       }));
       await api('POST', 'patrol_points', pointRows);
@@ -411,15 +402,12 @@
       document.getElementById('inp-loc-name').value = '';
       document.getElementById('inp-loc-address').value = '';
       document.getElementById('points-list').innerHTML = '';
-      pointCount = 0;
-      addPointRow();
+      pointCount = 0; addPointRow();
 
       await loadLocations();
       openLocation(loc.id);
-
     } catch(e) {
       toast('Error saving — check Supabase config', 'error');
-      console.error(e);
     }
 
     btn.innerHTML = 'Save Location & Generate QR Codes';
@@ -429,15 +417,12 @@
   async function loadLocations() {
     const locs = await api('GET', 'locations?order=created_at.desc&select=*');
     const el = document.getElementById('loc-list');
-
     if (!locs || locs.length === 0) {
-      el.innerHTML = '<div style="text-align:center;padding:30px;color:rgba(255,255,255,0.2);font-size:13px;">No locations yet. Add one above.</div>';
+      el.innerHTML = '<div style="text-align:center;padding:30px;color:#bbb;font-size:13px;">No locations yet. Add one above.</div>';
       return;
     }
-
     el.innerHTML = locs.map(l => `
-      <div class="loc-item ${l.id===selectedLocId?'selected':''} ${!l.is_active?'inactive':''}"
-           onclick="openLocation('${l.id}')">
+      <div class="loc-item ${l.id===selectedLocId?'selected':''} ${!l.is_active?'inactive':''}" onclick="openLocation('${l.id}')">
         <div class="loc-item-top">
           <span class="loc-name">${l.name}</span>
           <span class="active-dot ${l.is_active?'on':'off'}"></span>
@@ -451,25 +436,22 @@
             Delete
           </button>
         </div>
-      </div>
-    `).join('');
+      </div>`).join('');
   }
 
   async function openLocation(locId) {
     selectedLocId = locId;
-
     document.querySelectorAll('.loc-item').forEach(el => {
       el.classList.toggle('selected', el.onclick.toString().includes(locId));
     });
 
     const right = document.getElementById('right-panel');
-    right.innerHTML = '<div style="padding:40px;text-align:center;color:rgba(255,255,255,0.3)"><div class="spin" style="margin:0 auto 12px;width:28px;height:28px;border-top-color:rgba(255,255,255,0.4)"></div>Loading...</div>';
+    right.innerHTML = '<div style="padding:40px;text-align:center;color:#bbb"><div class="spin" style="margin:0 auto 12px;width:28px;height:28px;border-color:#e0e7ff;border-top-color:var(--sky)"></div>Loading...</div>';
 
     const [locs, points] = await Promise.all([
       api('GET', `locations?id=eq.${locId}&select=*`),
       api('GET', `patrol_points?location_id=eq.${locId}&order=created_at.asc&select=*`)
     ]);
-
     const loc = locs[0];
 
     right.innerHTML = `
@@ -484,8 +466,7 @@
       </div>
       <div class="section-label">QR Codes — ${points.length} Patrol Point${points.length!==1?'s':''}</div>
       <div class="qr-grid" id="qr-grid-screen"></div>
-      <div class="print-cards" id="qr-grid-print"></div>
-    `;
+      <div class="print-cards" id="qr-grid-print"></div>`;
 
     points.forEach((pt, i) => {
       const scanUrl = `${SCAN_BASE}?qr=${encodeURIComponent(pt.qr_code)}`;
@@ -496,14 +477,12 @@
       screenCard.innerHTML = `
         <div class="qr-canvas-wrap"><div id="${wrapId}"></div></div>
         <div class="qr-point-name">${pt.point_name}</div>
-        <div class="qr-code-id">${pt.qr_code}</div>
-      `;
+        <div class="qr-code-id">${pt.qr_code}</div>`;
       document.getElementById('qr-grid-screen').appendChild(screenCard);
       setTimeout(() => {
         new QRCode(document.getElementById(wrapId), {
           text: scanUrl, width:140, height:140,
-          colorDark:'#062B63', colorLight:'#ffffff',
-          correctLevel: QRCode.CorrectLevel.H
+          colorDark:'#062B63', colorLight:'#ffffff', correctLevel: QRCode.CorrectLevel.H
         });
       }, 50 * i);
 
@@ -515,18 +494,16 @@
           <div class="print-mini-logo">JG</div>
           <div class="print-brand">JIVAC GROUP</div>
         </div>
-        <div id="${printId}" class="print-qr" style="display:inline-block"></div>
+        <div id="${printId}" style="display:inline-block;margin-bottom:8px;"></div>
         <div class="print-point">${pt.point_name}</div>
         <div class="print-loc">${loc.name}</div>
         <div class="print-code">${pt.qr_code}</div>
-        <div class="print-instr">Scan to record patrol</div>
-      `;
+        <div class="print-instr">Scan to record patrol</div>`;
       document.getElementById('qr-grid-print').appendChild(printCard);
       setTimeout(() => {
         new QRCode(document.getElementById(printId), {
           text: scanUrl, width:160, height:160,
-          colorDark:'#062B63', colorLight:'#ffffff',
-          correctLevel: QRCode.CorrectLevel.H
+          colorDark:'#062B63', colorLight:'#ffffff', correctLevel: QRCode.CorrectLevel.H
         });
       }, 50 * i);
     });
@@ -540,19 +517,12 @@
   }
 
   async function deleteLocation(locId, name) {
-    if (!confirm(`Delete "${name}" and all its QR codes? This cannot be undone.`)) return;
+    if (!confirm(`Delete "${name}" and all its QR codes?`)) return;
     await api('DELETE', `locations?id=eq.${locId}`);
     toast(`"${name}" deleted`);
     if (selectedLocId === locId) {
       selectedLocId = null;
-      document.getElementById('right-panel').innerHTML = `
-        <div class="empty-right">
-          <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-            <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
-            <rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="3" height="3"/>
-          </svg>
-          <p>Select a location to view its QR codes</p>
-        </div>`;
+      document.getElementById('right-panel').innerHTML = `<div class="empty-right"><p>Select a location to view its QR codes</p></div>`;
     }
     await loadLocations();
   }
@@ -560,6 +530,5 @@
   addPointRow();
   loadLocations();
 </script>
-
 </body>
 </html>

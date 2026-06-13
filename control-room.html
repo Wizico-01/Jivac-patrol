@@ -80,7 +80,7 @@
     .legend-dot { width:16px; height:16px; border-radius:4px; border:1.5px solid; }
     .legend-dot.clocked     { background:#dcfce7; border-color:#86efac; }
     .legend-dot.not-clocked { background:#fee2e2; border-color:#fca5a5; }
-    .legend-dot.future      { background:#f8faff; border-color:#e0e7ff; }
+    .legend-dot.future       { background:#f8faff; border-color:#e0e7ff; }
 
     .empty { text-align:center; padding:60px 20px; color:#bbb; font-size:14px; }
     .spin-sm { width:28px; height:28px; border:3px solid #e0e7ff; border-top-color:var(--sky); border-radius:50%; animation:rot 0.8s linear infinite; margin:0 auto 12px; }
@@ -181,8 +181,9 @@
     const currentH = now.getHours();
     const today = now.toISOString().split('T')[0];
 
+    // Fixed schema references to query both safety properties: location_name and fallback name
     const [locations, todayRounds] = await Promise.all([
-      get('locations?is_active=eq.true&select=id,name,total_points,address&order=name'),
+      get('locations?is_active=eq.true&select=id,location_name,name,total_points,address&order=created_at.desc'),
       get(`patrol_rounds?round_date=eq.${today}&status=eq.completed&select=location_id,hour_window`)
     ]);
 
@@ -205,6 +206,9 @@
     container.innerHTML = '';
 
     locations.forEach(loc => {
+      // Map safe string layout name securely across table structures
+      const correctLocName = loc.location_name || loc.name || "Unnamed Facility";
+      
       // Count completed rounds today for this location
       const roundsToday = todayRounds.filter(r => r.location_id === loc.id).length;
       const currentDone = completedSet.has(`${loc.id}-${currentH}`);
@@ -216,8 +220,8 @@
       block.innerHTML = `
         <div class="loc-block-top">
           <div>
-            <div class="loc-block-name">${loc.name}</div>
-            <div class="loc-block-meta">${loc.total_points} patrol point${loc.total_points!==1?'s':''} · ${loc.address||'No address'} · ${roundsToday} round${roundsToday!==1?'s':''} completed today</div>
+            <div class="loc-block-name">${correctLocName}</div>
+            <div class="loc-block-meta">${loc.total_points || 0} patrol point${loc.total_points!==1?'s':''} · ${loc.address||'No address'} · ${roundsToday} round${roundsToday!==1?'s':''} completed today</div>
           </div>
           <div class="loc-block-summary">
             <span class="summary-badge ${currentDone?'green':'red'}">${currentDone ? '✓ Clocked This Hour' : '✗ Not Clocked'}</span>
@@ -262,7 +266,7 @@
   load();
   setInterval(load, REFRESH);
 
-  // Realtime
+  // Realtime Connection Fix
   (() => {
     try {
       const ws = new WebSocket(`${SUPA_URL.replace('https://','wss://')}/realtime/v1/websocket?apikey=${SUPA_KEY}&vsn=1.0.0`);

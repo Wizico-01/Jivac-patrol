@@ -6,7 +6,6 @@
   <title>JIVAC Patrol</title>
   <style>
     *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
-
     body {
       font-family:'Segoe UI', system-ui, sans-serif;
       background: linear-gradient(160deg, #062B63 0%, #0a1f4e 100%);
@@ -15,20 +14,14 @@
       align-items: center; justify-content: center;
       padding: 24px;
     }
-
     .card {
-      background: #fff;
-      border-radius: 24px;
-      padding: 40px 32px 36px;
-      width: 100%; max-width: 360px;
-      text-align: center;
+      background: #fff; border-radius: 24px; padding: 40px 32px 36px;
+      width: 100%; max-width: 360px; text-align: center;
       box-shadow: 0 32px 80px rgba(0,0,0,0.4);
     }
-
     .card-header {
       display: flex; align-items: center; justify-content: center; gap: 10px;
-      padding-bottom: 20px; margin-bottom: 28px;
-      border-bottom: 3px solid #C9A24A;
+      padding-bottom: 20px; margin-bottom: 28px; border-bottom: 3px solid #C9A24A;
     }
     .logo-box {
       width: 38px; height: 38px; background: #062B63; border-radius: 7px;
@@ -36,71 +29,38 @@
       font-weight: 900; font-size: 13px; color: #C9A24A;
     }
     .brand-name { font-size: 16px; font-weight: 800; color: #062B63; letter-spacing: 1px; }
-
     .state { display: none; }
     .state.active { display: block; }
-
-    /* Loading */
     #s-loading .ring {
-      width: 64px; height: 64px;
-      border: 5px solid #e8f0fe;
-      border-top-color: #1E90FF;
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-      margin: 0 auto 18px;
+      width: 64px; height: 64px; border: 5px solid #e8f0fe;
+      border-top-color: #1E90FF; border-radius: 50%;
+      animation: spin 0.8s linear infinite; margin: 0 auto 18px;
     }
     @keyframes spin { to { transform:rotate(360deg); } }
     #s-loading p { color: #888; font-size: 15px; }
-
-    /* Icon circles */
     .icon-circle {
       width: 88px; height: 88px; border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      margin: 0 auto 20px;
+      display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;
       animation: pop 0.5s cubic-bezier(.175,.885,.32,1.275);
     }
     @keyframes pop { from{transform:scale(0);opacity:0} to{transform:scale(1);opacity:1} }
-
     .icon-circle.green { background: #dcfce7; }
     .icon-circle.amber { background: #fef9c3; }
     .icon-circle.red   { background: #fee2e2; }
-
-    .icon-circle svg {
-      width: 40px; height: 40px; fill: none;
-      stroke-width: 3; stroke-linecap: round; stroke-linejoin: round;
-    }
+    .icon-circle svg { width: 40px; height: 40px; fill: none; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
     .icon-circle.green svg { stroke: #16a34a; }
     .icon-circle.amber svg { stroke: #ca8a04; }
     .icon-circle.red   svg { stroke: #dc2626; }
-
     .state-title { font-size: 24px; font-weight: 900; color: #062B63; margin-bottom: 8px; }
     .state-sub   { font-size: 14px; color: #666; line-height: 1.6; }
-
-    /* Point & location display */
     .point-name { font-size: 18px; font-weight: 800; color: #1E90FF; margin: 12px 0 4px; }
     .loc-name   { font-size: 13px; color: #888; margin-bottom: 16px; }
-
-    /* Status chip */
-    .chip {
-      display: inline-flex; align-items: center; gap: 6px;
-      padding: 8px 20px; border-radius: 20px;
-      font-size: 13px; font-weight: 700; margin-top: 4px;
-    }
+    .chip { display: inline-flex; align-items: center; gap: 6px; padding: 8px 20px; border-radius: 20px; font-size: 13px; font-weight: 700; margin-top: 4px; }
     .chip.green { background: #dcfce7; color: #16a34a; border: 1.5px solid #86efac; }
     .chip.blue  { background: #dbeafe; color: #1d4ed8; border: 1.5px solid #93c5fd; }
-
-    /* All done banner */
-    .all-done-banner {
-      margin-top: 16px; background: #f0fdf4;
-      border: 1.5px solid #86efac; border-radius: 10px; padding: 12px 16px;
-    }
+    .all-done-banner { margin-top: 16px; background: #f0fdf4; border: 1.5px solid #86efac; border-radius: 10px; padding: 12px 16px; }
     .all-done-banner p { font-size: 12px; color: #16a34a; font-weight: 600; }
-
-    footer {
-      margin-top: 28px; font-size: 11px;
-      color: rgba(255,255,255,0.3);
-      letter-spacing: 1.5px; text-transform: uppercase;
-    }
+    footer { margin-top: 28px; font-size: 11px; color: rgba(255,255,255,0.3); letter-spacing: 1.5px; text-transform: uppercase; }
   </style>
 </head>
 <body>
@@ -157,10 +117,8 @@
 <footer>JIVAC GROUP · Patrol Management System</footer>
 
 <script>
-  // ── CREDENTIALS ─────────────────────────────────────────────────
   const SUPA_URL = 'https://mwqpdttawfnrugibjbbm.supabase.co';
   const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im13cXBkdHRhd2ZucnVnaWJqYmJtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExNDAyMjEsImV4cCI6MjA5NjcxNjIyMX0.9CpFiqucvcBbkw2QrtrGwS4X4m1TXY2z4gs6HxYUtJc';
-  // ────────────────────────────────────────────────────────────────
 
   function show(id) {
     document.querySelectorAll('.state').forEach(s => s.classList.remove('active'));
@@ -179,13 +137,10 @@
       body: body ? JSON.stringify(body) : undefined
     });
     if (r.status === 204) return true;
-    
-    // Safety check if response fails entirely
     if (!r.ok) {
-      const errText = await r.text();
-      throw new Error(`Database error: ${errText}`);
+      const txt = await r.text();
+      throw new Error(`Database rejected operation: ${txt}`);
     }
-    
     return r.json().catch(() => null);
   }
 
@@ -194,9 +149,9 @@
     if (!qrCode) { show('s-error'); return; }
 
     try {
-      // 1. Look up the patrol point (Using schema variable locations(location_name))
+      // 1. Look up checkpoint and pull explicit structural columns safely
       const pts = await db('GET',
-        `patrol_points?qr_code=eq.${encodeURIComponent(qrCode)}&select=id,point_name,location_id,locations(location_name,total_points,is_active)`
+        `patrol_points?qr_code=eq.${encodeURIComponent(qrCode)}&select=id,point_name,location_id,locations(location_name,name,total_points,is_active)`
       );
 
       if (!pts || pts.length === 0) { show('s-error'); return; }
@@ -206,7 +161,7 @@
 
       if (!loc || !loc.is_active) { show('s-error'); return; }
 
-      // 2. Check if already scanned this hour
+      // 2. Setup hourly window check
       const now       = new Date();
       const hourStart = new Date(now); hourStart.setMinutes(0, 0, 0);
       const hourEnd   = new Date(now); hourEnd.setMinutes(59, 59, 999);
@@ -220,7 +175,7 @@
         return;
       }
 
-      // 3. Record this scan
+      // 3. Record scan entry safely
       await db('POST', 'scans', {
         patrol_point_id: pt.id,
         location_id:     pt.location_id,
@@ -228,19 +183,20 @@
         scanned_at:      now.toISOString()
       });
 
-      // 4. Show SUCCESS immediately — guard sees this right away
+      // 4. Update the layout text content elements
       document.getElementById('disp-point').textContent = pt.point_name;
-      document.getElementById('disp-loc').textContent   = loc.location_name || loc.name;
+      document.getElementById('disp-loc').textContent   = loc.location_name || loc.name || "Active Station";
       show('s-success');
 
-      // 5. Check if ALL points done this hour
+      // 5. Total progress confirmation check
       const allScans = await db('GET',
         `scans?location_id=eq.${pt.location_id}&scanned_at=gte.${hourStart.toISOString()}&scanned_at=lte.${hourEnd.toISOString()}&select=patrol_point_id`
       );
 
       const uniquePointsScanned = new Set(allScans.map(s => s.patrol_point_id));
+      const targetGoal = loc.total_points || 0;
 
-      if (uniquePointsScanned.size >= loc.total_points) {
+      if (uniquePointsScanned.size >= targetGoal && targetGoal > 0) {
         const h     = now.getHours();
         const today = now.toISOString().split('T')[0];
 
@@ -257,19 +213,16 @@
             hour_window:  h
           });
         }
-
-        // Show the "all done" banner on the guard's screen too
         document.getElementById('all-done-banner').style.display = 'block';
       }
 
     } catch(e) {
-      console.error('Scan error:', e);
+      console.error('Scan system processing error:', e);
       show('s-error');
     }
   }
 
   run();
 </script>
-
 </body>
 </html>

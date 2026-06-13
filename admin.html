@@ -185,18 +185,27 @@
   let selectedLocId = null;
 
   async function api(method, path, body) {
-    const r = await fetch(`${SUPA_URL}/rest/v1/${path}`, {
-      method,
-      headers: {
-        'apikey': SUPA_KEY, 'Authorization': `Bearer ${SUPA_KEY}`,
-        'Content-Type': 'application/json',
-        'Prefer': method === 'POST' ? 'return=representation' : ''
-      },
-      body: body ? JSON.stringify(body) : undefined
-    });
-    if (r.status === 204) return true;
-    const text = await r.text();
-    try { return JSON.parse(text); } catch { return null; }
+    try {
+      const r = await fetch(`${SUPA_URL}/rest/v1/${path}`, {
+        method,
+        headers: {
+          'apikey': SUPA_KEY, 'Authorization': `Bearer ${SUPA_KEY}`,
+          'Content-Type': 'application/json',
+          'Prefer': method === 'POST' ? 'return=representation' : ''
+        },
+        body: body ? JSON.stringify(body) : undefined
+      });
+      if (!r.ok) {
+        console.error(`API error: ${r.status} ${r.statusText}`);
+        return null; 
+      }
+      if (r.status === 204) return true;
+      const text = await r.text();
+      try { return JSON.parse(text); } catch { return null; }
+    } catch (err) {
+      console.error("Network error inside api execution:", err);
+      return null;
+    }
   }
 
   function toast(msg, type='success') {
@@ -255,6 +264,8 @@
 
     try {
       const locs = await api('POST', 'locations', { name, address: address || null, total_points: points.length });
+      if (!locs) throw new Error('Database insertion rejected (Verify RLS policies / Authorization token).');
+      
       const loc = Array.isArray(locs) ? locs[0] : locs;
       if (!loc || !loc.id) throw new Error('No location ID returned');
 
@@ -270,13 +281,14 @@
       document.getElementById('inp-loc-name').value = '';
       document.getElementById('inp-loc-address').value = '';
       document.getElementById('points-list').innerHTML = '';
-      pointCount = 0; addPointRow();
+      pointCount = 0; 
+      addPointRow();
 
       await loadLocations();
       openLocation(loc.id);
     } catch(e) {
       console.error('Save error:', e);
-      toast('Failed to save. Check console for details.', 'error');
+      toast(e.message || 'Failed to save. Check console for details.', 'error');
     }
 
     btn.innerHTML = 'Save Location & Generate QR Codes'; btn.disabled = false;
@@ -285,10 +297,12 @@
   async function loadLocations() {
     const locs = await api('GET', 'locations?order=created_at.desc&select=*');
     const el = document.getElementById('loc-list');
-    if (!locs || locs.length === 0) {
+    
+    if (!locs || !Array.isArray(locs) || locs.length === 0) {
       el.innerHTML = '<div style="text-align:center;padding:30px;color:#bbb;font-size:13px;">No locations yet. Add one above.</div>';
       return;
     }
+    
     el.innerHTML = locs.map(l => `
       <div class="loc-item ${l.id === selectedLocId ? 'selected' : ''} ${!l.is_active ? 'inactive' : ''}" onclick="openLocation('${l.id}')">
         <div class="loc-item-top">
@@ -305,8 +319,11 @@
 
   async function openLocation(locId) {
     selectedLocId = locId;
+    
     document.querySelectorAll('.loc-item').forEach(el => {
-      el.classList.toggle('selected', el.onclick && el.onclick.toString().includes(locId));
+      // Safely perform structural checks on elements containing active bindings
+      const match = el.getAttribute('onclick') && el.getAttribute('onclick').includes(locId);
+      el.classList.toggle('selected', !!match);
     });
 
     const right = document.getElementById('right-panel');
@@ -317,8 +334,11 @@
       api('GET', `patrol_points?location_id=eq.${locId}&order=created_at.asc&select=*`)
     ]);
 
-    if (!locs || locs.length === 0) { right.innerHTML = '<div class="empty-right"><p>Location not found.</p></div>'; return; }
+    if (!locs || !Array.isArray(locs) || locs.length === 0) { right.innerHTML = '<div class="empty-right"><p>Location not found.</p></div>'; return; }
     const loc = locs[0];
+    
+    // Fallback safe array formatting if network block yields structural errors
+    const validPoints = Array.isArray(points) ? points : [];
 
     right.innerHTML = `
       <div class="loc-detail-header">
@@ -331,21 +351,18 @@
         </div>
       </div>
       <div class="download-bar">
-        <span>${points.length} QR Code${points.length !== 1 ? 's' : ''} generated for this location</span>
+        <span>${validPoints.length} QR Code${validPoints.length !== 1 ? 's' : ''} generated for this location</span>
         <div class="download-bar-btns">
-          <button class="btn-download" onclick="downloadAllQR('${loc.name}')">⬇ Download All QR Codes</button>
+          <button class="btn-download" onclick="downloadAllQR('${loc.name.replace(/'/g, "\\'")}')">⬇ Download All QR Codes</button>
           <button class="btn-ghost" style="width:auto;padding:7px 14px;font-size:11px;" onclick="window.print()">🖨 Print</button>
         </div>
       </div>
-      <div class="section-label">QR Codes — ${points.length} Patrol Point${points.length !== 1 ? 's' : ''}</div>
+      <div class="section-label">QR Codes — ${validPoints.length} Patrol Point${validPoints.length !== 1 ? 's' : ''}</div>
       <div class="qr-grid" id="qr-grid-screen"></div>
       <div class="print-cards" id="qr-grid-print"></div>`;
 
-    const qrData = [];
-
-    points.forEach((pt, i) => {
+    validPoints.forEach((pt, i) => {
       const scanUrl = `${SCAN_BASE}?qr=${encodeURIComponent(pt.qr_code)}`;
-      qrData.push({ pt, scanUrl });
 
       const screenCard = document.createElement('div');
       screenCard.className = 'qr-card-screen';
@@ -354,7 +371,7 @@
         <div class="qr-canvas-wrap"><div id="${wrapId}"></div></div>
         <div class="qr-point-name">${pt.point_name}</div>
         <div class="qr-code-id">${pt.qr_code}</div>
-        <button class="btn-download" style="margin-top:8px;font-size:10px;padding:5px 10px;" onclick="downloadSingleQR('${wrapId}','${pt.point_name}')">⬇ Download</button>`;
+        <button class="btn-download" style="margin-top:8px;font-size:10px;padding:5px 10px;" onclick="downloadSingleQR('${wrapId}','${pt.point_name.replace(/'/g, "\\'")}')">⬇ Download</button>`;
       document.getElementById('qr-grid-screen').appendChild(screenCard);
 
       setTimeout(() => {
@@ -414,7 +431,8 @@
   }
 
   async function toggleActive(locId, current) {
-    await api('PATCH', `locations?id=eq.${locId}`, { is_active: !current });
+    const res = await api('PATCH', `locations?id=eq.${locId}`, { is_active: !current });
+    if (!res) { toast('Failed to update status', 'error'); return; }
     toast(current ? 'Location deactivated' : 'Location activated');
     await loadLocations();
     if (selectedLocId === locId) openLocation(locId);
@@ -427,11 +445,21 @@
     toast(`"${name}" deleted`);
     if (selectedLocId === locId) {
       selectedLocId = null;
-      document.getElementById('right-panel').innerHTML = `<div class="empty-right"><svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#ddd" stroke-width="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="3" height="3"/></svg><p>Select a location to view its QR codes</p></div>`;
+      document.getElementById('right-panel').innerHTML = `
+        <div class="empty-right">
+          <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#ddd" stroke-width="1.5">
+            <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+            <rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="3" height="3"/>
+            <rect x="19" y="14" width="2" height="2"/><rect x="14" y="19" width="2" height="2"/>
+            <rect x="18" y="18" width="3" height="3"/>
+          </svg>
+          <p>Select a location to view and download its QR codes</p>
+        </div>`;
     }
     await loadLocations();
   }
 
+  // Initial runs
   addPointRow();
   loadLocations();
 </script>

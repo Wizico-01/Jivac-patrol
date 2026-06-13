@@ -6,150 +6,97 @@
   <title>JIVAC Control Room</title>
   <style>
     *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
-
     :root {
-      --navy:  #062B63; --blue: #1565C0; --sky: #1E90FF;
-      --gold:  #C9A24A; --white: #FFFFFF; --black: #111111;
-      --green: #2FA84F; --red: #E52424; --bg: #f0f4ff;
+      --navy:#062B63; --sky:#1E90FF; --gold:#C9A24A;
+      --black:#111111; --green:#16a34a; --red:#dc2626; --bg:#f0f4ff;
     }
-
     body { font-family:'Segoe UI',system-ui,sans-serif; background:var(--bg); color:var(--black); min-height:100vh; }
-
     header {
-      background: var(--navy); border-bottom: 3px solid var(--gold);
-      height: 64px; display: flex; align-items: center; justify-content: space-between;
-      padding: 0 32px; position: sticky; top: 0; z-index: 100;
-      box-shadow: 0 2px 20px rgba(6,43,99,0.3);
+      background:var(--navy); border-bottom:3px solid var(--gold);
+      height:64px; display:flex; align-items:center; justify-content:space-between;
+      padding:0 32px; position:sticky; top:0; z-index:100;
+      box-shadow:0 2px 20px rgba(6,43,99,0.3);
     }
-
     .hd-left { display:flex; align-items:center; gap:12px; }
-    .logo-box {
-      width:40px; height:40px; background:var(--gold); border-radius:7px;
-      display:flex; align-items:center; justify-content:center;
-      font-weight:900; font-size:15px; color:var(--black);
-    }
+    .logo-box { width:40px; height:40px; background:var(--gold); border-radius:7px; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:15px; color:var(--black); }
     .hd-title h1 { font-size:16px; font-weight:800; letter-spacing:1.5px; color:#fff; }
     .hd-title p  { font-size:9px; color:var(--gold); letter-spacing:2.5px; text-transform:uppercase; margin-top:1px; }
-
     .hd-right { display:flex; align-items:center; gap:16px; }
-
-    .live-pill {
-      display:flex; align-items:center; gap:7px;
-      background:rgba(47,168,79,0.15); border:1px solid rgba(47,168,79,0.4);
-      border-radius:20px; padding:5px 14px;
-      font-size:12px; font-weight:700; color:#2FA84F;
-    }
-    .live-dot { width:8px; height:8px; background:#2FA84F; border-radius:50%; animation:blink 1.6s infinite; }
+    .live-pill { display:flex; align-items:center; gap:7px; background:rgba(47,168,79,0.15); border:1px solid rgba(47,168,79,0.4); border-radius:20px; padding:5px 14px; font-size:12px; font-weight:700; color:#16a34a; }
+    .live-dot { width:8px; height:8px; background:#16a34a; border-radius:50%; animation:blink 1.6s infinite; }
     @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
-
     #clock { font-size:15px; font-weight:700; color:rgba(255,255,255,0.5); font-variant-numeric:tabular-nums; }
-
     .nav-links { display:flex; gap:8px; }
-    .nav-link {
-      padding:7px 16px; border-radius:7px; font-size:12px; font-weight:600;
-      text-decoration:none; color:rgba(255,255,255,0.6);
-      border:1px solid transparent; transition:all 0.2s;
-    }
+    .nav-link { padding:7px 16px; border-radius:7px; font-size:12px; font-weight:600; text-decoration:none; color:rgba(255,255,255,0.6); border:1px solid transparent; transition:all 0.2s; }
     .nav-link:hover { color:#fff; border-color:rgba(255,255,255,0.3); }
     .nav-link.active { background:rgba(255,255,255,0.15); color:#fff; border-color:rgba(255,255,255,0.2); }
-
-    main { padding:32px; max-width:1280px; margin:0 auto; }
-
-    .top-strip { display:flex; align-items:center; justify-content:space-between; margin-bottom:28px; }
+    main { padding:28px 32px; max-width:1400px; margin:0 auto; }
+    .top-strip { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; }
     .top-strip h2 { font-size:20px; font-weight:800; color:var(--navy); }
     .top-strip .sub { font-size:13px; color:#888; margin-top:3px; }
+    .refresh-btn { background:#fff; border:1.5px solid #d1d9f0; border-radius:8px; padding:8px 16px; color:var(--navy); font-size:12px; font-weight:700; cursor:pointer; transition:all 0.2s; }
+    .refresh-btn:hover { border-color:var(--sky); }
 
-    .refresh-btn {
-      background:#fff; border:1.5px solid #d1d9f0; border-radius:8px;
-      padding:8px 16px; color:var(--blue); font-size:12px; font-weight:700; cursor:pointer; transition:all 0.2s;
+    /* Summary cards */
+    .summary-row { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:28px; }
+    .sum-card { background:#fff; border:1.5px solid #e0e7ff; border-radius:12px; padding:18px 20px; box-shadow:0 2px 8px rgba(6,43,99,0.05); }
+    .sum-card .s-label { font-size:10px; text-transform:uppercase; letter-spacing:1.5px; color:#999; margin-bottom:6px; }
+    .sum-card .s-val { font-size:34px; font-weight:900; line-height:1; }
+    .sum-card.s-total .s-val { color:var(--navy); }
+    .sum-card.s-done  .s-val { color:var(--green); }
+    .sum-card.s-miss  .s-val { color:var(--red); }
+
+    /* 24-hour grid */
+    .sec-label { font-size:11px; text-transform:uppercase; letter-spacing:2px; color:#999; margin-bottom:12px; padding-bottom:8px; border-bottom:1.5px solid #e0e7ff; }
+
+    .location-block { background:#fff; border:1.5px solid #e0e7ff; border-radius:14px; margin-bottom:16px; overflow:hidden; box-shadow:0 2px 8px rgba(6,43,99,0.04); }
+
+    .loc-block-top { display:flex; align-items:center; justify-content:space-between; padding:14px 20px; border-bottom:1px solid #f0f4ff; }
+    .loc-block-name { font-size:15px; font-weight:800; color:var(--navy); }
+    .loc-block-meta { font-size:11px; color:#aaa; margin-top:2px; }
+    .loc-block-summary { display:flex; align-items:center; gap:8px; }
+    .summary-badge { padding:4px 12px; border-radius:20px; font-size:11px; font-weight:700; }
+    .summary-badge.green { background:#dcfce7; color:var(--green); border:1px solid #86efac; }
+    .summary-badge.red   { background:#fee2e2; color:var(--red);   border:1px solid #fca5a5; }
+
+    /* Hour cells grid */
+    .hours-grid { display:grid; grid-template-columns:repeat(12, 1fr); gap:4px; padding:12px 16px; }
+    .hours-grid-bottom { display:grid; grid-template-columns:repeat(12, 1fr); gap:4px; padding:0 16px 12px; }
+
+    .hour-cell { text-align:center; }
+    .hour-label { font-size:9px; color:#bbb; margin-bottom:3px; font-weight:600; }
+    .hour-box {
+      height:32px; border-radius:6px; display:flex; align-items:center; justify-content:center;
+      font-size:10px; font-weight:700; border:1.5px solid transparent; transition:all 0.2s;
+      cursor:default;
     }
-    .refresh-btn:hover { border-color:var(--sky); box-shadow:0 4px 12px rgba(30,144,255,0.1); }
+    .hour-box.clocked   { background:#dcfce7; border-color:#86efac; color:var(--green); }
+    .hour-box.not-clocked { background:#fee2e2; border-color:#fca5a5; color:var(--red); }
+    .hour-box.future    { background:#f8faff; border-color:#e0e7ff; color:#ccc; }
+    .hour-box.current   { border-color:var(--sky) !important; }
 
-    .summary-row { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:32px; }
-    .sum-card {
-      background:#fff; border:1.5px solid #e0e7ff; border-radius:12px; padding:20px 22px;
-      box-shadow:0 2px 8px rgba(6,43,99,0.05);
-    }
-    .sum-card .s-label { font-size:10px; text-transform:uppercase; letter-spacing:1.5px; color:#999; margin-bottom:8px; }
-    .sum-card .s-val   { font-size:38px; font-weight:900; line-height:1; }
-    .sum-card.s-total  .s-val { color:var(--navy); }
-    .sum-card.s-done   .s-val { color:var(--green); }
-    .sum-card.s-missed .s-val { color:var(--red); }
+    .legend { display:flex; align-items:center; gap:16px; margin-bottom:20px; }
+    .legend-item { display:flex; align-items:center; gap:6px; font-size:12px; color:#666; }
+    .legend-dot { width:16px; height:16px; border-radius:4px; border:1.5px solid; }
+    .legend-dot.clocked     { background:#dcfce7; border-color:#86efac; }
+    .legend-dot.not-clocked { background:#fee2e2; border-color:#fca5a5; }
+    .legend-dot.future      { background:#f8faff; border-color:#e0e7ff; }
 
-    .sec-label {
-      font-size:11px; text-transform:uppercase; letter-spacing:2px; color:#999;
-      margin-bottom:14px; padding-bottom:8px; border-bottom:1.5px solid #e0e7ff;
-    }
-
-    .loc-grid {
-      display:grid; grid-template-columns:repeat(auto-fill, minmax(260px,1fr));
-      gap:14px; margin-bottom:40px;
-    }
-
-    .loc-card {
-      border-radius:14px; padding:22px 20px;
-      display:flex; align-items:center; gap:16px;
-      position:relative; overflow:hidden; transition:transform 0.2s, box-shadow 0.2s;
-      background:#fff; border:1.5px solid #e0e7ff;
-    }
-    .loc-card:hover { transform:translateY(-2px); box-shadow:0 8px 24px rgba(6,43,99,0.1); }
-
-    .loc-card.done   { background:#f0fdf4; border-color:#86efac; }
-    .loc-card.missed { background:#fff5f5; border-color:#fca5a5; }
-
-    .status-orb {
-      width:54px; height:54px; border-radius:50%;
-      display:flex; align-items:center; justify-content:center; flex-shrink:0;
-    }
-    .loc-card.done   .status-orb { background:#dcfce7; }
-    .loc-card.missed .status-orb { background:#fee2e2; }
-
-    .status-orb svg { width:26px; height:26px; fill:none; stroke-width:2.5; stroke-linecap:round; stroke-linejoin:round; }
-    .loc-card.done   .status-orb svg { stroke:var(--green); }
-    .loc-card.missed .status-orb svg { stroke:var(--red); }
-
-    .loc-info { flex:1; min-width:0; }
-    .loc-info .l-name { font-size:15px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-bottom:4px; color:var(--navy); }
-    .loc-info .l-status { font-size:12px; font-weight:700; }
-    .loc-card.done   .l-status { color:var(--green); }
-    .loc-card.missed .l-status { color:var(--red); }
-    .loc-info .l-pts { font-size:11px; color:#aaa; margin-top:2px; }
-
-    .rounds-today {
-      position:absolute; top:10px; right:12px;
-      background:rgba(6,43,99,0.06); border-radius:8px;
-      padding:2px 8px; font-size:10px; color:#999; font-weight:600;
-    }
-
-    .log-box {
-      background:#fff; border:1.5px solid #e0e7ff; border-radius:12px; overflow:hidden;
-      box-shadow:0 2px 8px rgba(6,43,99,0.05);
-    }
-    .log-box-header { padding:14px 20px; border-bottom:1px solid #e0e7ff; font-size:13px; font-weight:700; color:var(--navy); }
-    table { width:100%; border-collapse:collapse; }
-    thead th { padding:10px 20px; font-size:10px; text-transform:uppercase; letter-spacing:1.5px; color:#999; text-align:left; background:#f8faff; }
-    tbody tr { border-top:1px solid #f0f4ff; transition:background 0.15s; }
-    tbody tr:hover { background:#f8faff; }
-    tbody td { padding:13px 20px; font-size:13px; color:#444; }
-
-    .pill { display:inline-flex; align-items:center; gap:5px; padding:3px 11px; border-radius:20px; font-size:11px; font-weight:700; }
-    .pill.done { background:#f0fdf4; color:var(--green); border:1px solid #86efac; }
-
-    .empty { text-align:center; padding:48px 20px; color:#bbb; font-size:14px; }
+    .empty { text-align:center; padding:60px 20px; color:#bbb; font-size:14px; }
     .spin-sm { width:28px; height:28px; border:3px solid #e0e7ff; border-top-color:var(--sky); border-radius:50%; animation:rot 0.8s linear infinite; margin:0 auto 12px; }
     @keyframes rot { to { transform:rotate(360deg); } }
 
-    @media (max-width:768px) {
+    @media (max-width:900px) {
       main { padding:20px 14px; }
       header { padding:0 14px; }
       #clock { display:none; }
+      .hours-grid, .hours-grid-bottom { grid-template-columns:repeat(6,1fr); }
       .summary-row { gap:8px; }
-      .sum-card .s-val { font-size:28px; }
+      .sum-card .s-val { font-size:26px; }
     }
   </style>
 </head>
 <body>
-
 <header>
   <div class="hd-left">
     <div class="logo-box">JG</div>
@@ -174,65 +121,46 @@
   <div class="top-strip">
     <div>
       <h2>Patrol Status — <span id="date-str">Today</span></h2>
-      <div class="sub" id="hour-str">Current hour window</div>
+      <div class="sub">Live 24-hour patrol tracking for all locations</div>
     </div>
     <button class="refresh-btn" onclick="load()">↻ Refresh</button>
   </div>
 
   <div class="summary-row">
-    <div class="sum-card s-total">
-      <div class="s-label">Active Locations</div>
-      <div class="s-val" id="s-total">—</div>
-    </div>
-    <div class="sum-card s-done">
-      <div class="s-label">Completed This Hour</div>
-      <div class="s-val" id="s-done">—</div>
-    </div>
-    <div class="sum-card s-missed">
-      <div class="s-label">No Patrol</div>
-      <div class="s-val" id="s-missed">—</div>
-    </div>
+    <div class="sum-card s-total"><div class="s-label">Active Locations</div><div class="s-val" id="s-total">—</div></div>
+    <div class="sum-card s-done"><div class="s-label">Completed This Hour</div><div class="s-val" id="s-done">—</div></div>
+    <div class="sum-card s-miss"><div class="s-label">No Patrol This Hour</div><div class="s-val" id="s-miss">—</div></div>
   </div>
 
-  <div class="sec-label">Current Hour — All Locations</div>
-  <div class="loc-grid" id="loc-grid">
-    <div class="empty"><div class="spin-sm"></div>Loading locations…</div>
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot clocked"></div>Clocked (all points done)</div>
+    <div class="legend-item"><div class="legend-dot not-clocked"></div>Not Clocked</div>
+    <div class="legend-item"><div class="legend-dot future"></div>Future Hour</div>
   </div>
 
-  <div class="sec-label">Today's Completed Rounds</div>
-  <div class="log-box">
-    <div class="log-box-header">Patrol Round Log — Today</div>
-    <table>
-      <thead>
-        <tr><th>Location</th><th>Hour</th><th>Status</th><th>Completed</th></tr>
-      </thead>
-      <tbody id="log-body">
-        <tr><td colspan="4"><div class="empty"><div class="spin-sm"></div>Loading…</div></td></tr>
-      </tbody>
-    </table>
+  <div class="sec-label">All Locations — 24 Hour Patrol Grid</div>
+  <div id="loc-blocks">
+    <div class="empty"><div class="spin-sm"></div>Loading patrol data…</div>
   </div>
 </main>
 
 <script>
   const SUPA_URL = 'https://mwqpdttawfnrugibjbbm.supabase.co';
   const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im13cXBkdHRhd2ZucnVnaWJqYmJtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE0NDAyMjEsImV4cCI6MjA5NjcxNjIyMX0.9CpFiqucvcBbkw2QrtrGwS4X4m1TXY2z4gs6HxYUtJc';
-  const REFRESH  = 30000;
+  const REFRESH = 30000;
 
   function tick() {
     document.getElementById('clock').textContent = new Date().toLocaleTimeString('en-NG',{hour12:false});
   }
   tick(); setInterval(tick, 1000);
 
-  function setDateLabels() {
+  function setDateLabel() {
     const n = new Date();
     const days   = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
     const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
     document.getElementById('date-str').textContent = `${days[n.getDay()]}, ${n.getDate()} ${months[n.getMonth()]} ${n.getFullYear()}`;
-    const h = n.getHours();
-    const fmt = h => { const s=h%12||12; return `${s}:00 ${h>=12?'PM':'AM'}`; };
-    document.getElementById('hour-str').textContent = `Hour window: ${fmt(h)} – ${fmt(h)}:59`;
   }
-  setDateLabels();
+  setDateLabel();
 
   async function get(path) {
     const r = await fetch(`${SUPA_URL}/rest/v1/${path}`, {
@@ -242,75 +170,99 @@
     return r.json().catch(() => []);
   }
 
-  function fmtHour(h) { const s=h%12||12; const sf=h>=12?'PM':'AM'; return `${s}:00 ${sf} – ${s}:59 ${sf}`; }
-  function fmtTime(iso) {
-    if (!iso) return '—';
-    return new Date(iso).toLocaleTimeString('en-NG',{hour:'2-digit',minute:'2-digit',hour12:true});
+  function fmtHour(h) {
+    const s = h % 12 || 12;
+    const sf = h >= 12 ? 'PM' : 'AM';
+    return `${s}${sf}`;
   }
 
   async function load() {
     const now   = new Date();
-    const h     = now.getHours();
+    const currentH = now.getHours();
     const today = now.toISOString().split('T')[0];
 
-    const [locations, completedThisHour, todayRounds] = await Promise.all([
-      get('locations?is_active=eq.true&select=id,name,total_points&order=name'),
-      get(`patrol_rounds?round_date=eq.${today}&hour_window=eq.${h}&status=eq.completed&select=location_id`),
-      get(`patrol_rounds?round_date=eq.${today}&status=eq.completed&select=*,locations(name)&order=completed_at.desc`)
+    const [locations, todayRounds] = await Promise.all([
+      get('locations?is_active=eq.true&select=id,name,total_points,address&order=name'),
+      get(`patrol_rounds?round_date=eq.${today}&status=eq.completed&select=location_id,hour_window`)
     ]);
 
-    const doneIds = new Set(completedThisHour.map(r => r.location_id));
-    const total   = locations.length;
-    const done    = locations.filter(l => doneIds.has(l.id)).length;
+    // Build a set: "locId-hour" for completed rounds
+    const completedSet = new Set(todayRounds.map(r => `${r.location_id}-${r.hour_window}`));
 
-    document.getElementById('s-total').textContent  = total;
-    document.getElementById('s-done').textContent   = done;
-    document.getElementById('s-missed').textContent = total - done;
+    // Summary
+    const total = locations.length;
+    const doneThisHour = locations.filter(l => completedSet.has(`${l.id}-${currentH}`)).length;
+    document.getElementById('s-total').textContent = total;
+    document.getElementById('s-done').textContent  = doneThisHour;
+    document.getElementById('s-miss').textContent  = total - doneThisHour;
 
-    const grid = document.getElementById('loc-grid');
+    const container = document.getElementById('loc-blocks');
     if (locations.length === 0) {
-      grid.innerHTML = '<div class="empty">No active locations. Add them in the Admin panel.</div>';
-    } else {
-      const roundsByLoc = {};
-      todayRounds.forEach(r => { roundsByLoc[r.location_id] = (roundsByLoc[r.location_id]||0)+1; });
+      container.innerHTML = '<div class="empty">No active locations. Add them in the Admin panel.</div>';
+      return;
+    }
 
-      grid.innerHTML = locations.map(l => {
-        const isDone = doneIds.has(l.id);
-        const rounds = roundsByLoc[l.id] || 0;
-        return `
-          <div class="loc-card ${isDone?'done':'missed'}">
-            <div class="status-orb">
-              ${isDone
-                ? `<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>`
-                : `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`}
-            </div>
-            <div class="loc-info">
-              <div class="l-name">${l.name}</div>
-              <div class="l-status">${isDone ? '✓ Completed' : '✗ No Patrol'}</div>
-              <div class="l-pts">${l.total_points} point${l.total_points!==1?'s':''}</div>
-            </div>
-            ${rounds>0 ? `<div class="rounds-today">${rounds} round${rounds>1?'s':''} today</div>` : ''}
+    container.innerHTML = '';
+
+    locations.forEach(loc => {
+      // Count completed rounds today for this location
+      const roundsToday = todayRounds.filter(r => r.location_id === loc.id).length;
+      const currentDone = completedSet.has(`${loc.id}-${currentH}`);
+
+      const block = document.createElement('div');
+      block.className = 'location-block';
+
+      // Top info bar
+      block.innerHTML = `
+        <div class="loc-block-top">
+          <div>
+            <div class="loc-block-name">${loc.name}</div>
+            <div class="loc-block-meta">${loc.total_points} patrol point${loc.total_points!==1?'s':''} · ${loc.address||'No address'} · ${roundsToday} round${roundsToday!==1?'s':''} completed today</div>
+          </div>
+          <div class="loc-block-summary">
+            <span class="summary-badge ${currentDone?'green':'red'}">${currentDone ? '✓ Clocked This Hour' : '✗ Not Clocked'}</span>
+          </div>
+        </div>`;
+
+      // Hours 0–11 (top row)
+      const topRow = document.createElement('div');
+      topRow.className = 'hours-grid';
+      for (let h = 0; h < 12; h++) {
+        const done = completedSet.has(`${loc.id}-${h}`);
+        const isFuture = h > currentH;
+        const isCurrent = h === currentH;
+        let cls = isFuture ? 'future' : (done ? 'clocked' : 'not-clocked');
+        topRow.innerHTML += `
+          <div class="hour-cell">
+            <div class="hour-label">${fmtHour(h)}</div>
+            <div class="hour-box ${cls} ${isCurrent?'current':''}">${isFuture ? '' : (done ? '✓' : '✗')}</div>
           </div>`;
-      }).join('');
-    }
+      }
+      block.appendChild(topRow);
 
-    const tbody = document.getElementById('log-body');
-    if (todayRounds.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="4"><div class="empty">No completed patrols recorded today yet.</div></td></tr>';
-    } else {
-      tbody.innerHTML = todayRounds.map(r => `
-        <tr>
-          <td>${r.locations?.name||'—'}</td>
-          <td>${fmtHour(r.hour_window)}</td>
-          <td><span class="pill done">✓ Completed</span></td>
-          <td>${fmtTime(r.completed_at)}</td>
-        </tr>`).join('');
-    }
+      // Hours 12–23 (bottom row)
+      const botRow = document.createElement('div');
+      botRow.className = 'hours-grid-bottom';
+      for (let h = 12; h < 24; h++) {
+        const done = completedSet.has(`${loc.id}-${h}`);
+        const isFuture = h > currentH;
+        const isCurrent = h === currentH;
+        let cls = isFuture ? 'future' : (done ? 'clocked' : 'not-clocked');
+        botRow.innerHTML += `
+          <div class="hour-cell">
+            <div class="hour-label">${fmtHour(h)}</div>
+            <div class="hour-box ${cls} ${isCurrent?'current':''}">${isFuture ? '' : (done ? '✓' : '✗')}</div>
+          </div>`;
+      }
+      block.appendChild(botRow);
+      container.appendChild(block);
+    });
   }
 
   load();
   setInterval(load, REFRESH);
 
+  // Realtime
   (() => {
     try {
       const ws = new WebSocket(`${SUPA_URL.replace('https://','wss://')}/realtime/v1/websocket?apikey=${SUPA_KEY}&vsn=1.0.0`);

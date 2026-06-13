@@ -111,13 +111,11 @@
     <div class="brand-name">JIVAC GROUP</div>
   </div>
 
-  <!-- LOADING -->
   <div id="s-loading" class="state active">
     <div class="ring"></div>
     <p>Recording patrol point…</p>
   </div>
 
-  <!-- SUCCESS -->
   <div id="s-success" class="state">
     <div class="icon-circle green">
       <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
@@ -131,7 +129,6 @@
     </div>
   </div>
 
-  <!-- ALREADY SCANNED -->
   <div id="s-already" class="state">
     <div class="icon-circle amber">
       <svg viewBox="0 0 24 24">
@@ -145,7 +142,6 @@
     <div class="chip blue" style="margin-top:16px;">Point logged earlier</div>
   </div>
 
-  <!-- INVALID -->
   <div id="s-error" class="state">
     <div class="icon-circle red">
       <svg viewBox="0 0 24 24">
@@ -163,7 +159,7 @@
 <script>
   // ── CREDENTIALS ─────────────────────────────────────────────────
   const SUPA_URL = 'https://mwqpdttawfnrugibjbbm.supabase.co';
-  const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im13cXBkdHRhd2ZucnVnaWJqYmJtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE0NDAyMjEsImV4cCI6MjA5NjcxNjIyMX0.9CpFiqucvcBbkw2QrtrGwS4X4m1TXY2z4gs6HxYUtJc';
+  const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im13cXBkdHRhd2ZucnVnaWJqYmJtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExNDAyMjEsImV4cCI6MjA5NjcxNjIyMX0.9CpFiqucvcBbkw2QrtrGwS4X4m1TXY2z4gs6HxYUtJc';
   // ────────────────────────────────────────────────────────────────
 
   function show(id) {
@@ -183,6 +179,13 @@
       body: body ? JSON.stringify(body) : undefined
     });
     if (r.status === 204) return true;
+    
+    // Safety check if response fails entirely
+    if (!r.ok) {
+      const errText = await r.text();
+      throw new Error(`Database error: ${errText}`);
+    }
+    
     return r.json().catch(() => null);
   }
 
@@ -191,9 +194,9 @@
     if (!qrCode) { show('s-error'); return; }
 
     try {
-      // 1. Look up the patrol point
+      // 1. Look up the patrol point (Using schema variable locations(location_name))
       const pts = await db('GET',
-        `patrol_points?qr_code=eq.${encodeURIComponent(qrCode)}&select=id,point_name,location_id,locations(name,total_points,is_active)`
+        `patrol_points?qr_code=eq.${encodeURIComponent(qrCode)}&select=id,point_name,location_id,locations(location_name,total_points,is_active)`
       );
 
       if (!pts || pts.length === 0) { show('s-error'); return; }
@@ -227,11 +230,10 @@
 
       // 4. Show SUCCESS immediately — guard sees this right away
       document.getElementById('disp-point').textContent = pt.point_name;
-      document.getElementById('disp-loc').textContent   = loc.name;
+      document.getElementById('disp-loc').textContent   = loc.location_name || loc.name;
       show('s-success');
 
-      // 5. In background — check if ALL points done this hour
-      //    If yes → write patrol_rounds record → control room sees Completed
+      // 5. Check if ALL points done this hour
       const allScans = await db('GET',
         `scans?location_id=eq.${pt.location_id}&scanned_at=gte.${hourStart.toISOString()}&scanned_at=lte.${hourEnd.toISOString()}&select=patrol_point_id`
       );
@@ -239,7 +241,6 @@
       const uniquePointsScanned = new Set(allScans.map(s => s.patrol_point_id));
 
       if (uniquePointsScanned.size >= loc.total_points) {
-        // All points done — record completed patrol round
         const h     = now.getHours();
         const today = now.toISOString().split('T')[0];
 

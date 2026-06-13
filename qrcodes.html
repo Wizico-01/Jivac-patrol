@@ -152,12 +152,14 @@
     const r = await fetch(`${SUPA_URL}/rest/v1/${path}`, {
       headers: { 'apikey': SUPA_KEY, 'Authorization': `Bearer ${SUPA_KEY}` }
     });
+    if (!r.ok) return [];
     return r.json().catch(() => []);
   }
 
   async function load() {
+    // Fixed order field mapping to use created_at descending order
     const [locations, points] = await Promise.all([
-      get('locations?is_active=eq.true&order=name&select=*'),
+      get('locations?is_active=eq.true&order=created_at.desc&select=*'),
       get('patrol_points?order=created_at.asc&select=*')
     ]);
 
@@ -173,12 +175,15 @@
     locations.forEach((loc, li) => {
       const locPoints = points.filter(p => p.location_id === loc.id);
 
+      // Adjusted mapping variables to fall back securely on location_name or company_name schema matching
+      const nameToDisplay = loc.location_name || loc.company_name || loc.name || "Unnamed Location";
+
       const block = document.createElement('div');
       block.className = 'loc-block';
       block.innerHTML = `
         <div class="loc-block-header">
           <div>
-            <h3>${loc.name}</h3>
+            <h3>${nameToDisplay}</h3>
             <div class="meta">${loc.address || 'No address'}</div>
           </div>
           <div class="pt-count">${locPoints.length} Point${locPoints.length!==1?'s':''}</div>

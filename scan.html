@@ -9,103 +9,97 @@
 
     body {
       font-family:'Segoe UI', system-ui, sans-serif;
-      background: linear-gradient(160deg, #062B63 0%, #03163a 100%);
+      background: linear-gradient(160deg, #062B63 0%, #0a1f4e 100%);
       min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
       padding: 24px;
     }
 
     .card {
       background: #fff;
-      border-radius: 20px;
+      border-radius: 24px;
       padding: 40px 32px 36px;
-      width: 100%;
-      max-width: 360px;
+      width: 100%; max-width: 360px;
       text-align: center;
-      box-shadow: 0 32px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05);
+      box-shadow: 0 32px 80px rgba(0,0,0,0.4);
     }
 
     .card-header {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      padding-bottom: 20px;
-      margin-bottom: 28px;
-      border-bottom: 2px solid #C9A24A;
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      padding-bottom: 20px; margin-bottom: 28px;
+      border-bottom: 3px solid #C9A24A;
     }
     .logo-box {
-      width: 36px; height: 36px;
-      background: #111;
-      border-radius: 6px;
+      width: 38px; height: 38px; background: #062B63; border-radius: 7px;
       display: flex; align-items: center; justify-content: center;
-      font-weight: 900; font-size: 13px; color: #C9A24A; letter-spacing: -1px;
+      font-weight: 900; font-size: 13px; color: #C9A24A;
     }
-    .brand-name { font-size: 15px; font-weight: 800; color: #111; letter-spacing: 1px; }
+    .brand-name { font-size: 16px; font-weight: 800; color: #062B63; letter-spacing: 1px; }
 
     .state { display: none; }
     .state.active { display: block; }
 
+    /* Loading */
     #s-loading .ring {
-      width: 60px; height: 60px;
-      border: 5px solid #f0f0f0;
-      border-top-color: #0B4FAF;
+      width: 64px; height: 64px;
+      border: 5px solid #e8f0fe;
+      border-top-color: #1E90FF;
       border-radius: 50%;
       animation: spin 0.8s linear infinite;
       margin: 0 auto 18px;
     }
     @keyframes spin { to { transform:rotate(360deg); } }
-    #s-loading p { color: #777; font-size: 15px; }
+    #s-loading p { color: #888; font-size: 15px; }
 
+    /* Icon circles */
     .icon-circle {
-      width: 80px; height: 80px;
-      border-radius: 50%;
+      width: 88px; height: 88px; border-radius: 50%;
       display: flex; align-items: center; justify-content: center;
       margin: 0 auto 20px;
-      animation: pop 0.45s cubic-bezier(.175,.885,.32,1.275);
+      animation: pop 0.5s cubic-bezier(.175,.885,.32,1.275);
     }
-    @keyframes pop {
-      from { transform:scale(0); opacity:0; }
-      to   { transform:scale(1); opacity:1; }
-    }
-    .icon-circle.green { background: #edfaf1; }
-    .icon-circle.amber { background: #fdf8ec; }
-    .icon-circle.red   { background: #fef0f0; }
+    @keyframes pop { from{transform:scale(0);opacity:0} to{transform:scale(1);opacity:1} }
+
+    .icon-circle.green { background: #dcfce7; }
+    .icon-circle.amber { background: #fef9c3; }
+    .icon-circle.red   { background: #fee2e2; }
 
     .icon-circle svg {
-      width: 36px; height: 36px;
-      stroke-width: 3; fill: none;
-      stroke-linecap: round; stroke-linejoin: round;
+      width: 40px; height: 40px; fill: none;
+      stroke-width: 3; stroke-linecap: round; stroke-linejoin: round;
     }
-    .icon-circle.green svg { stroke: #2FA84F; }
-    .icon-circle.amber svg { stroke: #C9A24A; }
-    .icon-circle.red   svg { stroke: #E52424; }
+    .icon-circle.green svg { stroke: #16a34a; }
+    .icon-circle.amber svg { stroke: #ca8a04; }
+    .icon-circle.red   svg { stroke: #dc2626; }
 
-    .state-title { font-size: 22px; font-weight: 800; color: #111; margin-bottom: 6px; }
-    .state-sub   { font-size: 14px; color: #888; line-height: 1.5; }
+    .state-title { font-size: 24px; font-weight: 900; color: #062B63; margin-bottom: 8px; }
+    .state-sub   { font-size: 14px; color: #666; line-height: 1.6; }
 
+    /* Point & location display */
+    .point-name { font-size: 18px; font-weight: 800; color: #1E90FF; margin: 12px 0 4px; }
+    .loc-name   { font-size: 13px; color: #888; margin-bottom: 16px; }
+
+    /* Status chip */
     .chip {
-      display: inline-block;
-      margin-top: 18px;
-      padding: 6px 18px;
-      border-radius: 20px;
-      font-size: 12px; font-weight: 700;
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 8px 20px; border-radius: 20px;
+      font-size: 13px; font-weight: 700; margin-top: 4px;
     }
-    .chip.blue  { background: #eef4ff; color: #0B4FAF; border:1px solid #c5d8fa; }
-    .chip.green { background: #edfaf1; color: #2FA84F; border:1px solid #b3e8c3; }
+    .chip.green { background: #dcfce7; color: #16a34a; border: 1.5px solid #86efac; }
+    .chip.blue  { background: #dbeafe; color: #1d4ed8; border: 1.5px solid #93c5fd; }
 
-    .point-highlight { color: #0B4FAF; font-weight: 700; }
-    .loc-highlight   { color: #888; }
+    /* All done banner */
+    .all-done-banner {
+      margin-top: 16px; background: #f0fdf4;
+      border: 1.5px solid #86efac; border-radius: 10px; padding: 12px 16px;
+    }
+    .all-done-banner p { font-size: 12px; color: #16a34a; font-weight: 600; }
 
     footer {
-      margin-top: 28px;
-      font-size: 11px;
-      color: rgba(255,255,255,0.25);
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
+      margin-top: 28px; font-size: 11px;
+      color: rgba(255,255,255,0.3);
+      letter-spacing: 1.5px; text-transform: uppercase;
     }
   </style>
 </head>
@@ -128,12 +122,13 @@
     <div class="icon-circle green">
       <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
     </div>
-    <div class="state-title">Patrol Submitted</div>
-    <div class="state-sub">
-      <span class="point-highlight" id="disp-point"></span><br>
-      <span class="loc-highlight"   id="disp-loc"></span>
-    </div>
+    <div class="state-title">Patrol Submitted!</div>
+    <div class="point-name" id="disp-point"></div>
+    <div class="loc-name"   id="disp-loc"></div>
     <div class="chip green">✓ Point Recorded</div>
+    <div class="all-done-banner" id="all-done-banner" style="display:none">
+      <p>🎉 All patrol points completed for this hour!</p>
+    </div>
   </div>
 
   <!-- ALREADY SCANNED -->
@@ -147,7 +142,7 @@
     </div>
     <div class="state-title">Already Scanned</div>
     <div class="state-sub">This point was already recorded this hour.<br>No duplicate needed.</div>
-    <div class="chip blue">Point logged earlier</div>
+    <div class="chip blue" style="margin-top:16px;">Point logged earlier</div>
   </div>
 
   <!-- INVALID -->
@@ -168,7 +163,7 @@
 <script>
   // ── CREDENTIALS ─────────────────────────────────────────────────
   const SUPA_URL = 'https://mwqpdttawfnrugibjbbm.supabase.co';
-  const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im13cXBkdHRhd2ZucnVnaWJqYmJtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY3ODQwMTEsImV4cCI6MjA2MjM2MDAxMX0.9CpFiqucvcBbkw2QrtrGwS4X4m1TXY2z4gs6HxYUtJc';
+  const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im13cXBkdHRhd2ZucnVnaWJqYmJtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE0NDAyMjEsImV4cCI6MjA5NjcxNjIyMX0.9CpFiqucvcBbkw2QrtrGwS4X4m1TXY2z4gs6HxYUtJc';
   // ────────────────────────────────────────────────────────────────
 
   function show(id) {
@@ -196,7 +191,7 @@
     if (!qrCode) { show('s-error'); return; }
 
     try {
-      // 1. Look up patrol point
+      // 1. Look up the patrol point
       const pts = await db('GET',
         `patrol_points?qr_code=eq.${encodeURIComponent(qrCode)}&select=id,point_name,location_id,locations(name,total_points,is_active)`
       );
@@ -206,42 +201,53 @@
       const pt  = pts[0];
       const loc = pt.locations;
 
-      if (!loc.is_active) { show('s-error'); return; }
+      if (!loc || !loc.is_active) { show('s-error'); return; }
 
-      // 2. Check already scanned this hour
+      // 2. Check if already scanned this hour
       const now       = new Date();
-      const hourStart = new Date(now); hourStart.setMinutes(0,0,0);
-      const hourEnd   = new Date(now); hourEnd.setMinutes(59,59,999);
+      const hourStart = new Date(now); hourStart.setMinutes(0, 0, 0);
+      const hourEnd   = new Date(now); hourEnd.setMinutes(59, 59, 999);
 
       const existing = await db('GET',
         `scans?patrol_point_id=eq.${pt.id}&scanned_at=gte.${hourStart.toISOString()}&scanned_at=lte.${hourEnd.toISOString()}&select=id`
       );
 
-      if (existing && existing.length > 0) { show('s-already'); return; }
+      if (existing && existing.length > 0) {
+        show('s-already');
+        return;
+      }
 
-      // 3. Record scan
+      // 3. Record this scan
       await db('POST', 'scans', {
         patrol_point_id: pt.id,
         location_id:     pt.location_id,
-        qr_code:         qrCode
+        qr_code:         qrCode,
+        scanned_at:      now.toISOString()
       });
 
-      // 4. Check if all points scanned this hour
+      // 4. Show SUCCESS immediately — guard sees this right away
+      document.getElementById('disp-point').textContent = pt.point_name;
+      document.getElementById('disp-loc').textContent   = loc.name;
+      show('s-success');
+
+      // 5. In background — check if ALL points done this hour
+      //    If yes → write patrol_rounds record → control room sees Completed
       const allScans = await db('GET',
         `scans?location_id=eq.${pt.location_id}&scanned_at=gte.${hourStart.toISOString()}&scanned_at=lte.${hourEnd.toISOString()}&select=patrol_point_id`
       );
 
-      const unique = new Set(allScans.map(s => s.patrol_point_id));
+      const uniquePointsScanned = new Set(allScans.map(s => s.patrol_point_id));
 
-      if (unique.size >= loc.total_points) {
+      if (uniquePointsScanned.size >= loc.total_points) {
+        // All points done — record completed patrol round
         const h     = now.getHours();
         const today = now.toISOString().split('T')[0];
 
-        const exists = await db('GET',
+        const existingRound = await db('GET',
           `patrol_rounds?location_id=eq.${pt.location_id}&round_date=eq.${today}&hour_window=eq.${h}&select=id`
         );
 
-        if (!exists || exists.length === 0) {
+        if (!existingRound || existingRound.length === 0) {
           await db('POST', 'patrol_rounds', {
             location_id:  pt.location_id,
             status:       'completed',
@@ -250,15 +256,13 @@
             hour_window:  h
           });
         }
+
+        // Show the "all done" banner on the guard's screen too
+        document.getElementById('all-done-banner').style.display = 'block';
       }
 
-      // 5. Show success
-      document.getElementById('disp-point').textContent = pt.point_name;
-      document.getElementById('disp-loc').textContent   = loc.name;
-      show('s-success');
-
     } catch(e) {
-      console.error(e);
+      console.error('Scan error:', e);
       show('s-error');
     }
   }

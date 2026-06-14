@@ -115,9 +115,9 @@
 <footer>JIVAC GROUP · Patrol Management System</footer>
 
 <script>
-  // ── ONE KEY USED EVERYWHERE ──────────────────────────────────────
-  const SUPA_URL ='https://mwqpdttawfnrugibjbbm.supabase.co';
-  const SUPA_KEY ='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im13cXBkdHRhd2ZucnVnaWJqYmJtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE0NDAyMjEsImV4cCI6MjA5NjcxNjIyMX0.9CpFiqucvcBbkw2QrtrGwS4X4m1TXY2z4gs6HxYUtJc';
+  // ── CONFIDENCE VALUES ──────────────────────────────────────────
+  const SUPA_URL = 'https://mwqpdttawfnrugibjbbm.supabase.co';
+  const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im13cXBkdHRhd2ZucnVnaWJqYmJtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE0NDAyMjEsImV4cCI6MjA5NjcxNjIyMX0.9CpFiqucvcBbkw2QrtrGwS4X4m1TXY2z4gs6HxYUtJc';
   // ────────────────────────────────────────────────────────────────
 
   function show(id) {
@@ -126,7 +126,10 @@
   }
 
   async function db(method, path, body) {
-    const r = await fetch(`${SUPA_URL}/rest/v1/${path}`, {
+    // Automatically sanitizes accidental leading slashes in paths
+    const cleanPath = path.startsWith('/') ? path.slice(1) : path;
+    
+    const r = await fetch(`${SUPA_URL}/rest/v1/${cleanPath}`, {
       method,
       headers: {
         'apikey': SUPA_KEY,

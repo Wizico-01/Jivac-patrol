@@ -145,9 +145,11 @@
 </main>
 
 <script>
-  const SUPA_URL ='https://mwqpdttawfnrugibjbbm.supabase.co';
-  const SUPA_KEY ='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im13cXBkdHRhd2ZucnVnaWJqYmJtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExNDAyMjEsImV4cCI6MjA5NjcxNjIyMX0.9CpFiqucvcBbkw2QrtrGwS4X4m1TXY2z4gs6HxYUtJc';
-  const REFRESH = 30000;
+  const SUPA_URL = 'https://mwqpdttawfnrugibjbbm.supabase.co';
+  const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im13cXBkdHRhd2ZucnVnaWJqYmJtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExNDAyMjEsImV4cCI6MjA5NjcxNjIyMX0.9CpFiqucvcBbkw2QrtrGwS4X4m1TXY2z4gs6HxYUtJc';
+  
+  // Faster, high-precision background polling interval (5 seconds)
+  const REFRESH = 5000;
 
   function tick() {
     document.getElementById('clock').textContent = new Date().toLocaleTimeString('en-NG',{hour12:false});
@@ -163,7 +165,10 @@
   setDateLabel();
 
   async function get(path) {
-    const r = await fetch(`${SUPA_URL}/rest/v1/${path}`, {
+    // Sanitizes potential double leading slash anomalies instantly
+    const cleanPath = path.startsWith('/') ? path.slice(1) : path;
+    
+    const r = await fetch(`${SUPA_URL}/rest/v1/${cleanPath}`, {
       headers: { 'apikey':SUPA_KEY, 'Authorization':`Bearer ${SUPA_KEY}` }
     });
     if (!r.ok) return [];
@@ -181,7 +186,6 @@
     const currentH = now.getHours();
     const today = now.toISOString().split('T')[0];
 
-    // Fixed schema references to query both safety properties: location_name and fallback name
     const [locations, todayRounds] = await Promise.all([
       get('locations?is_active=eq.true&select=id,location_name,name,total_points,address&order=created_at.desc'),
       get(`patrol_rounds?round_date=eq.${today}&status=eq.completed&select=location_id,hour_window`)
@@ -206,7 +210,6 @@
     container.innerHTML = '';
 
     locations.forEach(loc => {
-      // Map safe string layout name securely across table structures
       const correctLocName = loc.location_name || loc.name || "Unnamed Facility";
       
       // Count completed rounds today for this location
@@ -266,13 +269,31 @@
   load();
   setInterval(load, REFRESH);
 
-  // Realtime Connection Fix
+  // Realtime WebSocket Real-Time Connection Flow
   (() => {
     try {
-      const ws = new WebSocket(`${SUPA_URL.replace('https://','wss://')}/realtime/v1/websocket?apikey=${SUPA_KEY}&vsn=1.0.0`);
-      ws.onopen = () => ws.send(JSON.stringify({topic:'realtime:public:patrol_rounds',event:'phx_join',payload:{},ref:'1'}));
-      ws.onmessage = e => { const m=JSON.parse(e.data); if(m.event==='INSERT'||m.event==='UPDATE') load(); };
-    } catch(_) {}
+      const wsUrl = `${SUPA_URL.replace('https://', 'wss://')}/realtime/v1/websocket?apikey=${SUPA_KEY}&vsn=1.0.0`;
+      const ws = new WebSocket(wsUrl);
+      
+      ws.onopen = () => {
+        // Enforce safe topic channel synchronization structure for Supabase realtime pipeline
+        ws.send(JSON.stringify({
+          topic: 'realtime:public:patrol_rounds',
+          event: 'phx_join',
+          payload: {},
+          ref: '1'
+        }));
+      };
+      
+      ws.onmessage = e => { 
+        const m = JSON.parse(e.data); 
+        if (m.event === 'INSERT' || m.event === 'UPDATE' || m.payload?.type === 'INSERT' || m.payload?.type === 'UPDATE') { 
+          load(); 
+        } 
+      };
+    } catch(e) {
+      console.warn('Realtime sync socket connection failed, falling back to pooled sync:', e);
+    }
   })();
 </script>
 </body>

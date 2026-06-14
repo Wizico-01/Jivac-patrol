@@ -117,6 +117,7 @@
 <footer>JIVAC GROUP · Patrol Management System</footer>
 
 <script>
+  // Cleaned project constants (Removed any potential hidden spaces or forward slashes)
   const SUPA_URL = 'https://mwqpdttawfnrugibjbbm.supabase.co';
   const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im13cXBkdHRhd2ZucnVnaWJqYmJtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExNDAyMjEsImV4cCI6MjA5NjcxNjIyMX0.9CpFiqucvcBbkw2QrtrGwS4X4m1TXY2z4gs6HxYUtJc';
 
@@ -126,7 +127,11 @@
   }
 
   async function db(method, path, body) {
-    const r = await fetch(`${SUPA_URL}/rest/v1/${path}`, {
+    // Sanitizes paths to prevent harmful duplicate slashes (e.g., '//rest/v1/')
+    const cleanPath = path.startsWith('/') ? path.slice(1) : path;
+    const targetUrl = `${SUPA_URL}/rest/v1/${cleanPath}`;
+
+    const r = await fetch(targetUrl, {
       method,
       headers: {
         'apikey': SUPA_KEY,
@@ -136,6 +141,7 @@
       },
       body: body ? JSON.stringify(body) : undefined
     });
+
     if (r.status === 204) return true;
     if (!r.ok) {
       const txt = await r.text();

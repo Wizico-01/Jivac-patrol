@@ -180,17 +180,27 @@
   let selectedLocId = null;
 
   async function api(method, path, body) {
-    const r = await fetch(`${SUPA_URL}/rest/v1/${path}`, {
+    // Sanitizes endpoint requests to prevent harmful double-slash formatting issues
+    const cleanPath = path.startsWith('/') ? path.slice(1) : path;
+    const targetUrl = `${SUPA_URL}/rest/v1/${cleanPath}`;
+
+    const r = await fetch(targetUrl, {
       method,
       headers: {
-        'apikey': SUPA_KEY, 'Authorization': `Bearer ${SUPA_KEY}`,
+        'apikey': SUPA_KEY, 
+        'Authorization': `Bearer ${SUPA_KEY}`,
         'Content-Type': 'application/json',
         'Prefer': method === 'POST' ? 'return=representation' : ''
       },
       body: body ? JSON.stringify(body) : undefined
     });
+    
     if (r.status === 204) return true;
-    if (!r.ok) { console.error('API error:', r.status, await r.text()); return null; }
+    if (!r.ok) { 
+      const txt = await r.text();
+      console.error('API execution error:', r.status, txt); 
+      return null; 
+    }
     return r.json().catch(() => null);
   }
 
@@ -249,7 +259,7 @@
     btn.innerHTML = '<span class="spin"></span> Saving...'; btn.disabled = true;
 
     try {
-      const locs = await api('POST', 'locations', { name, address: address || null, total_points: points.length });
+      const locs = await api('POST', 'locations', { name, address: address || null, total_points: points.length, is_active: true });
       if (!locs) throw new Error('Failed to save location — check Supabase RLS policies');
       const loc = Array.isArray(locs) ? locs[0] : locs;
       if (!loc || !loc.id) throw new Error('No location ID returned from database');
@@ -279,24 +289,37 @@
   }
 
   async function loadLocations() {
-    const locs = await api('GET', 'locations?order=created_at.desc&select=*');
-    const el = document.getElementById('loc-list');
-    if (!locs || !Array.isArray(locs) || locs.length === 0) {
-      el.innerHTML = '<div style="text-align:center;padding:30px;color:#bbb;font-size:13px;">No locations yet. Add one above.</div>';
-      return;
+    try {
+      const locs = await api('GET', 'locations?order=created_at.desc&select=*');
+      const el = document.getElementById('loc-list');
+      
+      // Fallback structural check to prevent layout crashes if the data returns invalid structure
+      if (!locs || !Array.isArray(locs)) {
+        el.innerHTML = '<div style="text-align:center;padding:30px;color:#f87171;font-size:13px;">Error loading locations. Check API keys.</div>';
+        return;
+      }
+      
+      if (locs.length === 0) {
+        el.innerHTML = '<div style="text-align:center;padding:30px;color:#bbb;font-size:13px;">No locations yet. Add one above.</div>';
+        return;
+      }
+      
+      el.innerHTML = locs.map(l => `
+        <div class="loc-item ${l.id === selectedLocId ? 'selected' : ''} ${!l.is_active ? 'inactive' : ''}" onclick="openLocation('${l.id}')">
+          <div class="loc-item-top">
+            <span class="loc-name">${l.name || 'Active Base'}</span>
+            <span class="active-dot ${l.is_active ? 'on' : 'off'}"></span>
+          </div>
+          <div class="loc-meta">${l.total_points || 0} patrol point${l.total_points !== 1 ? 's' : ''} · ${l.address || 'No address registered'}</div>
+          <div class="loc-actions">
+            <button class="btn btn-ghost" onclick="event.stopPropagation();toggleActive('${l.id}',${l.is_active})">${l.is_active ? 'Deactivate' : 'Activate'}</button>
+            <button class="btn btn-danger" onclick="event.stopPropagation();deleteLocation('${l.id}','${(l.name || 'Active Base').replace(/'/g, "\\'")}')">Delete</button>
+          </div>
+        </div>`).join('');
+    } catch (err) {
+      console.error('Render crash:', err);
+      document.getElementById('loc-list').innerHTML = '<div style="text-align:center;padding:30px;color:#f87171;font-size:13px;">Critical error parsing response array.</div>';
     }
-    el.innerHTML = locs.map(l => `
-      <div class="loc-item ${l.id === selectedLocId ? 'selected' : ''} ${!l.is_active ? 'inactive' : ''}" onclick="openLocation('${l.id}')">
-        <div class="loc-item-top">
-          <span class="loc-name">${l.name}</span>
-          <span class="active-dot ${l.is_active ? 'on' : 'off'}"></span>
-        </div>
-        <div class="loc-meta">${l.total_points} patrol point${l.total_points !== 1 ? 's' : ''} · ${l.address || 'No address'}</div>
-        <div class="loc-actions">
-          <button class="btn btn-ghost" onclick="event.stopPropagation();toggleActive('${l.id}',${l.is_active})">${l.is_active ? 'Deactivate' : 'Activate'}</button>
-          <button class="btn btn-danger" onclick="event.stopPropagation();deleteLocation('${l.id}','${l.name.replace(/'/g, "\\'")}')">Delete</button>
-        </div>
-      </div>`).join('');
   }
 
   async function openLocation(locId) {
@@ -320,7 +343,7 @@
     right.innerHTML = `
       <div class="loc-detail-header">
         <div>
-          <h2>${loc.name}</h2>
+          <h2>${loc.name || 'Active Base'}</h2>
           ${loc.address ? `<div class="address">${loc.address}</div>` : ''}
         </div>
         <div class="detail-actions">
@@ -330,7 +353,7 @@
       <div class="download-bar">
         <span>${validPoints.length} QR Code${validPoints.length !== 1 ? 's' : ''} for this location</span>
         <div class="download-bar-btns">
-          <button class="btn-download" onclick="downloadAllQR('${loc.name.replace(/'/g, "\\'")}')">⬇ Download All</button>
+          <button class="btn-download" onclick="downloadAllQR('${(loc.name || 'Base').replace(/'/g, "\\'")}')">⬇ Download All</button>
           <button class="btn-ghost" style="width:auto;padding:7px 14px;font-size:11px;" onclick="window.print()">🖨 Print</button>
         </div>
       </div>
@@ -364,7 +387,7 @@
         <div class="print-card-header"><div class="print-mini-logo">JG</div><div class="print-brand">JIVAC GROUP</div></div>
         <div id="${printId}" style="display:inline-block;margin-bottom:8px;"></div>
         <div class="print-point">${pt.point_name}</div>
-        <div class="print-loc">${loc.name}</div>
+        <div class="print-loc">${loc.name || 'Active Base'}</div>
         <div class="print-code">${pt.qr_code}</div>
         <div class="print-instr">Scan to record patrol</div>`;
       document.getElementById('qr-grid-print').appendChild(printCard);

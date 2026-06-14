@@ -59,12 +59,11 @@
     .chip.green { background: #dcfce7; color: #16a34a; border: 1.5px solid #86efac; }
     .chip.blue  { background: #dbeafe; color: #1d4ed8; border: 1.5px solid #93c5fd; }
     .all-done-banner { margin-top: 16px; background: #f0fdf4; border: 1.5px solid #86efac; border-radius: 10px; padding: 12px 16px; }
-    .all-done-banner p { font-size: 12px; color: #16a34a; font-weight: 600; }
+    .all-done-banner p { font-size: 13px; color: #16a34a; font-weight: 700; }
     footer { margin-top: 28px; font-size: 11px; color: rgba(255,255,255,0.3); letter-spacing: 1.5px; text-transform: uppercase; }
   </style>
 </head>
 <body>
-
 <div class="card">
   <div class="card-header">
     <div class="logo-box">JG</div>
@@ -82,7 +81,7 @@
     </div>
     <div class="state-title">Patrol Submitted!</div>
     <div class="point-name" id="disp-point"></div>
-    <div class="loc-name"   id="disp-loc"></div>
+    <div class="loc-name" id="disp-loc"></div>
     <div class="chip green">✓ Point Recorded</div>
     <div class="all-done-banner" id="all-done-banner" style="display:none">
       <p>🎉 All patrol points completed for this hour!</p>
@@ -113,13 +112,13 @@
     <div class="state-sub">This QR code is not recognised.<br>Contact your supervisor.</div>
   </div>
 </div>
-
 <footer>JIVAC GROUP · Patrol Management System</footer>
 
 <script>
-  // Cleaned project constants (Removed any potential hidden spaces or forward slashes)
+  // ── ONE KEY USED EVERYWHERE ──────────────────────────────────────
   const SUPA_URL = 'https://mwqpdttawfnrugibjbbm.supabase.co';
-  const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im13cXBkdHRhd2ZucnVnaWJqYmJtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExNDAyMjEsImV4cCI6MjA5NjcxNjIyMX0.9CpFiqucvcBbkw2QrtrGwS4X4m1TXY2z4gs6HxYUtJc';
+  const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im13cXBkdHRhd2ZucnVnaWJqYmJtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE0NDAyMjEsImV4cCI6MjA5NjcxNjIyMX0.9CpFiqucvcBbkw2QrtrGwS4X4m1TXY2z4gs6HxYUtJc';
+  // ────────────────────────────────────────────────────────────────
 
   function show(id) {
     document.querySelectorAll('.state').forEach(s => s.classList.remove('active'));
@@ -127,11 +126,7 @@
   }
 
   async function db(method, path, body) {
-    // Sanitizes paths to prevent harmful duplicate slashes (e.g., '//rest/v1/')
-    const cleanPath = path.startsWith('/') ? path.slice(1) : path;
-    const targetUrl = `${SUPA_URL}/rest/v1/${cleanPath}`;
-
-    const r = await fetch(targetUrl, {
+    const r = await fetch(`${SUPA_URL}/rest/v1/${path}`, {
       method,
       headers: {
         'apikey': SUPA_KEY,
@@ -141,11 +136,11 @@
       },
       body: body ? JSON.stringify(body) : undefined
     });
-
     if (r.status === 204) return true;
     if (!r.ok) {
       const txt = await r.text();
-      throw new Error(`Database rejected operation: ${txt}`);
+      console.error('DB error:', r.status, txt);
+      throw new Error(`DB error ${r.status}: ${txt}`);
     }
     return r.json().catch(() => null);
   }
@@ -155,9 +150,9 @@
     if (!qrCode) { show('s-error'); return; }
 
     try {
-      // 1. Look up checkpoint and pull explicit structural columns safely
+      // 1. Look up patrol point — join to locations table
       const pts = await db('GET',
-        `patrol_points?qr_code=eq.${encodeURIComponent(qrCode)}&select=id,point_name,location_id,locations(location_name,name,total_points,is_active)`
+        `patrol_points?qr_code=eq.${encodeURIComponent(qrCode)}&select=id,point_name,location_id,locations(name,total_points,is_active)`
       );
 
       if (!pts || pts.length === 0) { show('s-error'); return; }
@@ -167,7 +162,7 @@
 
       if (!loc || !loc.is_active) { show('s-error'); return; }
 
-      // 2. Setup hourly window check
+      // 2. Check if already scanned this hour
       const now       = new Date();
       const hourStart = new Date(now); hourStart.setMinutes(0, 0, 0);
       const hourEnd   = new Date(now); hourEnd.setMinutes(59, 59, 999);
@@ -176,12 +171,9 @@
         `scans?patrol_point_id=eq.${pt.id}&scanned_at=gte.${hourStart.toISOString()}&scanned_at=lte.${hourEnd.toISOString()}&select=id`
       );
 
-      if (existing && existing.length > 0) {
-        show('s-already');
-        return;
-      }
+      if (existing && existing.length > 0) { show('s-already'); return; }
 
-      // 3. Record scan entry safely
+      // 3. Record the scan
       await db('POST', 'scans', {
         patrol_point_id: pt.id,
         location_id:     pt.location_id,
@@ -189,20 +181,20 @@
         scanned_at:      now.toISOString()
       });
 
-      // 4. Update the layout text content elements
+      // 4. Show SUCCESS immediately to the guard
       document.getElementById('disp-point').textContent = pt.point_name;
-      document.getElementById('disp-loc').textContent   = loc.location_name || loc.name || "Active Station";
+      document.getElementById('disp-loc').textContent   = loc.name;
       show('s-success');
 
-      // 5. Total progress confirmation check
+      // 5. Check in background if ALL points for this location are done this hour
       const allScans = await db('GET',
         `scans?location_id=eq.${pt.location_id}&scanned_at=gte.${hourStart.toISOString()}&scanned_at=lte.${hourEnd.toISOString()}&select=patrol_point_id`
       );
 
-      const uniquePointsScanned = new Set(allScans.map(s => s.patrol_point_id));
-      const targetGoal = loc.total_points || 0;
+      const uniqueScanned = new Set(allScans.map(s => s.patrol_point_id));
 
-      if (uniquePointsScanned.size >= targetGoal && targetGoal > 0) {
+      if (uniqueScanned.size >= loc.total_points) {
+        // All points done — write to patrol_rounds so control room sees Completed
         const h     = now.getHours();
         const today = now.toISOString().split('T')[0];
 
@@ -219,11 +211,13 @@
             hour_window:  h
           });
         }
+
+        // Show "all done" banner to guard
         document.getElementById('all-done-banner').style.display = 'block';
       }
 
     } catch(e) {
-      console.error('Scan system processing error:', e);
+      console.error('Scan error:', e);
       show('s-error');
     }
   }

@@ -7,7 +7,7 @@
   <script>
     window.JIVAC_CONFIG = {
       SUPABASE_URL:      'https://mwqpdttawfnrugibjbbm.supabase.co',
-      SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im13cXBkdHRhd2ZucnVnaWJqYmJtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExNDAyMjEsImV4cCI6MjA5NjcxNjIyMX0.9CpFiqucvcBbkw2QrtrGwS4X4m1TXY2z4gs6HxYUtJc',
+      SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im13cXBkdHRhd2ZucnVnaWJqYmJtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE0NDAyMjEsImV4cCI6MjA5NjcxNjIyMX0.9CpFiqucvcBbkw2QrtrGwS4X4m1TXY2z4gs6HxYUtJc',
       SCAN_BASE_URL:     'https://wizico-01.github.io/Jivac-patrol/scan.html',
     };
   </script>
@@ -20,12 +20,7 @@
       --bg:#f0f4ff; --border:#e0e7ff;
     }
     body { font-family:'Segoe UI',system-ui,sans-serif; background:var(--bg); color:var(--black); min-height:100vh; }
-    header {
-      background:var(--navy); border-bottom:3px solid var(--gold);
-      height:64px; display:flex; align-items:center; justify-content:space-between;
-      padding:0 32px; position:sticky; top:0; z-index:200;
-      box-shadow:0 2px 20px rgba(6,43,99,0.3);
-    }
+    header { background:var(--navy); border-bottom:3px solid var(--gold); height:64px; display:flex; align-items:center; justify-content:space-between; padding:0 32px; position:sticky; top:0; z-index:200; box-shadow:0 2px 20px rgba(6,43,99,0.3); }
     .hd-left { display:flex; align-items:center; gap:12px; }
     .logo-box { width:40px; height:40px; background:var(--gold); border-radius:7px; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:15px; color:var(--black); }
     .hd-title h1 { font-size:16px; font-weight:800; letter-spacing:1.5px; color:#fff; }
@@ -185,27 +180,18 @@
   let selectedLocId = null;
 
   async function api(method, path, body) {
-    try {
-      const r = await fetch(`${SUPA_URL}/rest/v1/${path}`, {
-        method,
-        headers: {
-          'apikey': SUPA_KEY, 'Authorization': `Bearer ${SUPA_KEY}`,
-          'Content-Type': 'application/json',
-          'Prefer': method === 'POST' ? 'return=representation' : ''
-        },
-        body: body ? JSON.stringify(body) : undefined
-      });
-      if (!r.ok) {
-        console.error(`API error: ${r.status} ${r.statusText}`);
-        return null; 
-      }
-      if (r.status === 204) return true;
-      const text = await r.text();
-      try { return JSON.parse(text); } catch { return null; }
-    } catch (err) {
-      console.error("Network error inside api execution:", err);
-      return null;
-    }
+    const r = await fetch(`${SUPA_URL}/rest/v1/${path}`, {
+      method,
+      headers: {
+        'apikey': SUPA_KEY, 'Authorization': `Bearer ${SUPA_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': method === 'POST' ? 'return=representation' : ''
+      },
+      body: body ? JSON.stringify(body) : undefined
+    });
+    if (r.status === 204) return true;
+    if (!r.ok) { console.error('API error:', r.status, await r.text()); return null; }
+    return r.json().catch(() => null);
   }
 
   function toast(msg, type='success') {
@@ -264,10 +250,9 @@
 
     try {
       const locs = await api('POST', 'locations', { name, address: address || null, total_points: points.length });
-      if (!locs) throw new Error('Database insertion rejected (Verify RLS policies / Authorization token).');
-      
+      if (!locs) throw new Error('Failed to save location — check Supabase RLS policies');
       const loc = Array.isArray(locs) ? locs[0] : locs;
-      if (!loc || !loc.id) throw new Error('No location ID returned');
+      if (!loc || !loc.id) throw new Error('No location ID returned from database');
 
       const pointRows = points.map((pName, i) => ({
         location_id: loc.id, point_name: pName,
@@ -281,14 +266,13 @@
       document.getElementById('inp-loc-name').value = '';
       document.getElementById('inp-loc-address').value = '';
       document.getElementById('points-list').innerHTML = '';
-      pointCount = 0; 
-      addPointRow();
+      pointCount = 0; addPointRow();
 
       await loadLocations();
       openLocation(loc.id);
     } catch(e) {
       console.error('Save error:', e);
-      toast(e.message || 'Failed to save. Check console for details.', 'error');
+      toast(e.message || 'Failed to save', 'error');
     }
 
     btn.innerHTML = 'Save Location & Generate QR Codes'; btn.disabled = false;
@@ -297,12 +281,10 @@
   async function loadLocations() {
     const locs = await api('GET', 'locations?order=created_at.desc&select=*');
     const el = document.getElementById('loc-list');
-    
     if (!locs || !Array.isArray(locs) || locs.length === 0) {
       el.innerHTML = '<div style="text-align:center;padding:30px;color:#bbb;font-size:13px;">No locations yet. Add one above.</div>';
       return;
     }
-    
     el.innerHTML = locs.map(l => `
       <div class="loc-item ${l.id === selectedLocId ? 'selected' : ''} ${!l.is_active ? 'inactive' : ''}" onclick="openLocation('${l.id}')">
         <div class="loc-item-top">
@@ -319,11 +301,8 @@
 
   async function openLocation(locId) {
     selectedLocId = locId;
-    
     document.querySelectorAll('.loc-item').forEach(el => {
-      // Safely perform structural checks on elements containing active bindings
-      const match = el.getAttribute('onclick') && el.getAttribute('onclick').includes(locId);
-      el.classList.toggle('selected', !!match);
+      el.classList.toggle('selected', el.getAttribute('onclick') && el.getAttribute('onclick').includes(locId));
     });
 
     const right = document.getElementById('right-panel');
@@ -336,8 +315,6 @@
 
     if (!locs || !Array.isArray(locs) || locs.length === 0) { right.innerHTML = '<div class="empty-right"><p>Location not found.</p></div>'; return; }
     const loc = locs[0];
-    
-    // Fallback safe array formatting if network block yields structural errors
     const validPoints = Array.isArray(points) ? points : [];
 
     right.innerHTML = `
@@ -351,9 +328,9 @@
         </div>
       </div>
       <div class="download-bar">
-        <span>${validPoints.length} QR Code${validPoints.length !== 1 ? 's' : ''} generated for this location</span>
+        <span>${validPoints.length} QR Code${validPoints.length !== 1 ? 's' : ''} for this location</span>
         <div class="download-bar-btns">
-          <button class="btn-download" onclick="downloadAllQR('${loc.name.replace(/'/g, "\\'")}')">⬇ Download All QR Codes</button>
+          <button class="btn-download" onclick="downloadAllQR('${loc.name.replace(/'/g, "\\'")}')">⬇ Download All</button>
           <button class="btn-ghost" style="width:auto;padding:7px 14px;font-size:11px;" onclick="window.print()">🖨 Print</button>
         </div>
       </div>
@@ -373,7 +350,6 @@
         <div class="qr-code-id">${pt.qr_code}</div>
         <button class="btn-download" style="margin-top:8px;font-size:10px;padding:5px 10px;" onclick="downloadSingleQR('${wrapId}','${pt.point_name.replace(/'/g, "\\'")}')">⬇ Download</button>`;
       document.getElementById('qr-grid-screen').appendChild(screenCard);
-
       setTimeout(() => {
         new QRCode(document.getElementById(wrapId), {
           text: scanUrl, width: 140, height: 140,
@@ -392,7 +368,6 @@
         <div class="print-code">${pt.qr_code}</div>
         <div class="print-instr">Scan to record patrol</div>`;
       document.getElementById('qr-grid-print').appendChild(printCard);
-
       setTimeout(() => {
         new QRCode(document.getElementById(printId), {
           text: scanUrl, width: 160, height: 160,
@@ -406,12 +381,12 @@
     setTimeout(() => {
       const wrap = document.getElementById(wrapId);
       const canvas = wrap ? wrap.querySelector('canvas') : null;
-      if (!canvas) { toast('QR not ready yet, try again', 'error'); return; }
+      if (!canvas) { toast('QR not ready yet, try again in a second', 'error'); return; }
       const link = document.createElement('a');
       link.download = `QR-${pointName.replace(/\s+/g,'-')}.png`;
       link.href = canvas.toDataURL('image/png');
       link.click();
-    }, 100);
+    }, 200);
   }
 
   function downloadAllQR(locName) {
@@ -425,14 +400,14 @@
         link.download = `QR-${locName.replace(/\s+/g,'-')}-${name.replace(/\s+/g,'-')}.png`;
         link.href = canvas.toDataURL('image/png');
         link.click();
-      }, i * 300);
+      }, i * 400);
     });
     toast(`Downloading ${canvases.length} QR code${canvases.length > 1 ? 's' : ''}...`);
   }
 
   async function toggleActive(locId, current) {
     const res = await api('PATCH', `locations?id=eq.${locId}`, { is_active: !current });
-    if (!res) { toast('Failed to update status', 'error'); return; }
+    if (!res) { toast('Failed to update', 'error'); return; }
     toast(current ? 'Location deactivated' : 'Location activated');
     await loadLocations();
     if (selectedLocId === locId) openLocation(locId);
@@ -445,21 +420,11 @@
     toast(`"${name}" deleted`);
     if (selectedLocId === locId) {
       selectedLocId = null;
-      document.getElementById('right-panel').innerHTML = `
-        <div class="empty-right">
-          <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#ddd" stroke-width="1.5">
-            <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
-            <rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="3" height="3"/>
-            <rect x="19" y="14" width="2" height="2"/><rect x="14" y="19" width="2" height="2"/>
-            <rect x="18" y="18" width="3" height="3"/>
-          </svg>
-          <p>Select a location to view and download its QR codes</p>
-        </div>`;
+      document.getElementById('right-panel').innerHTML = `<div class="empty-right"><svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#ddd" stroke-width="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="3" height="3"/></svg><p>Select a location to view its QR codes</p></div>`;
     }
     await loadLocations();
   }
 
-  // Initial runs
   addPointRow();
   loadLocations();
 </script>

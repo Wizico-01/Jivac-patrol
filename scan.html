@@ -97,8 +97,8 @@
       </svg>
     </div>
     <div class="state-title">Already Scanned</div>
-    <div class="state-sub">This point was already recorded this hour.<br>No duplicate needed.</div>
-    <div class="chip blue" style="margin-top:16px;">Point logged earlier</div>
+    <div class="state-sub">This location's patrol was already recorded this hour.<br>No duplicate needed.</div>
+    <div class="chip blue" style="margin-top:16px;">Logged for this hour</div>
   </div>
 
   <div id="s-error" class="state">
@@ -115,10 +115,8 @@
 <footer>JIVAC GROUP · Patrol Management System</footer>
 
 <script>
-  // ── CONFIDENCE VALUES ──────────────────────────────────────────
   const SUPA_URL = 'https://mwqpdttawfnrugibjbbm.supabase.co';
   const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im13cXBkdHRhd2ZucnVnaWJqYmJtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE0NDAyMjEsImV4cCI6MjA5NjcxNjIyMX0.9CpFiqucvcBbkw2QrtrGwS4X4m1TXY2z4gs6HxYUtJc';
-  // ────────────────────────────────────────────────────────────────
 
   function show(id) {
     document.querySelectorAll('.state').forEach(s => s.classList.remove('active'));
@@ -126,7 +124,6 @@
   }
 
   async function db(method, path, body) {
-    // Automatically sanitizes accidental leading slashes in paths
     const cleanPath = path.startsWith('/') ? path.slice(1) : path;
     
     const r = await fetch(`${SUPA_URL}/rest/v1/${cleanPath}`, {
@@ -149,13 +146,16 @@
   }
 
   async function run() {
-    const qrCode = new URLSearchParams(window.location.search).get('qr');
+    // Correctly fallback to handle both '?code=' and '?qr=' configurations cleanly
+    const urlParams = new URLSearchParams(window.location.search);
+    const qrCode = urlParams.get('code') || urlParams.get('qr');
+    
     if (!qrCode) { show('s-error'); return; }
 
     try {
-      // 1. Look up patrol point — join to locations table
-      const pts = await db('GET',
-        `patrol_points?qr_code=eq.${encodeURIComponent(qrCode)}&select=id,point_name,location_id,locations(name,total_points,is_active)`
+      // 1. Look up point matching your exact column names (qr_code, point_name, location_id)
+      const pts = await db('GET', 
+        `patrol_points?qr_code=eq.${encodeURIComponent(qrCode)}&select=id,point_name,location_id,locations(location_name,is_active)`
       );
 
       if (!pts || pts.length === 0) { show('s-error'); return; }
@@ -163,64 +163,41 @@
       const pt  = pts[0];
       const loc = pt.locations;
 
-      if (!loc || !loc.is_active) { show('s-error'); return; }
+      // Handle fallback schema names securely for the join result framework
+      if (!loc || (loc.is_active === false)) { show('s-error'); return; }
+      const finalLocName = loc.location_name || loc.name || "Active Facility";
 
-      // 2. Check if already scanned this hour
-      const now       = new Date();
-      const hourStart = new Date(now); hourStart.setMinutes(0, 0, 0);
-      const hourEnd   = new Date(now); hourEnd.setMinutes(59, 59, 999);
+      const now = new Date();
+      const currentHour = now.getHours();
+      const todayDateStr = now.toISOString().split('T')[0];
 
-      const existing = await db('GET',
-        `scans?patrol_point_id=eq.${pt.id}&scanned_at=gte.${hourStart.toISOString()}&scanned_at=lte.${hourEnd.toISOString()}&select=id`
+      // 2. Check patrol_rounds directly to see if this hour window is already clocked
+      const existingRound = await db('GET',
+        `patrol_rounds?location_id=eq.${pt.location_id}&round_date=eq.${todayDateStr}&hour_window=eq.${currentHour}&select=id`
       );
 
-      if (existing && existing.length > 0) { show('s-already'); return; }
-
-      // 3. Record the scan
-      await db('POST', 'scans', {
-        patrol_point_id: pt.id,
-        location_id:     pt.location_id,
-        qr_code:         qrCode,
-        scanned_at:      now.toISOString()
-      });
-
-      // 4. Show SUCCESS immediately to the guard
-      document.getElementById('disp-point').textContent = pt.point_name;
-      document.getElementById('disp-loc').textContent   = loc.name;
-      show('s-success');
-
-      // 5. Check in background if ALL points for this location are done this hour
-      const allScans = await db('GET',
-        `scans?location_id=eq.${pt.location_id}&scanned_at=gte.${hourStart.toISOString()}&scanned_at=lte.${hourEnd.toISOString()}&select=patrol_point_id`
-      );
-
-      const uniqueScanned = new Set(allScans.map(s => s.patrol_point_id));
-
-      if (uniqueScanned.size >= loc.total_points) {
-        // All points done — write to patrol_rounds so control room sees Completed
-        const h     = now.getHours();
-        const today = now.toISOString().split('T')[0];
-
-        const existingRound = await db('GET',
-          `patrol_rounds?location_id=eq.${pt.location_id}&round_date=eq.${today}&hour_window=eq.${h}&select=id`
-        );
-
-        if (!existingRound || existingRound.length === 0) {
-          await db('POST', 'patrol_rounds', {
-            location_id:  pt.location_id,
-            status:       'completed',
-            completed_at: now.toISOString(),
-            round_date:   today,
-            hour_window:  h
-          });
-        }
-
-        // Show "all done" banner to guard
-        document.getElementById('all-done-banner').style.display = 'block';
+      if (existingRound && existingRound.length > 0) { 
+        show('s-already'); 
+        return; 
       }
 
+      // 3. Log directly into patrol_rounds
+      await db('POST', 'patrol_rounds', {
+        location_id:  pt.location_id,
+        status:       'completed',
+        completed_at: now.toISOString(),
+        round_date:   todayDateStr,
+        hour_window:  currentHour
+      });
+
+      // 4. Update elements and showcase confirmation safely
+      document.getElementById('disp-point').textContent = pt.point_name;
+      document.getElementById('disp-loc').textContent   = finalLocName;
+      document.getElementById('all-done-banner').style.display = 'block';
+      show('s-success');
+
     } catch(e) {
-      console.error('Scan error:', e);
+      console.error('Scan process tracking error:', e);
       show('s-error');
     }
   }

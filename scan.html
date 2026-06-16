@@ -36,7 +36,6 @@
     .state { display: none; }
     .state.active { display: block; }
 
-    /* ── LOADING ── */
     #s-loading .ring {
       width: 60px; height: 60px; border: 5px solid #e8f0fe;
       border-top-color: #1E90FF; border-radius: 50%;
@@ -45,7 +44,6 @@
     @keyframes spin { to { transform:rotate(360deg); } }
     #s-loading p { color: #888; font-size: 15px; }
 
-    /* ── READY TO CLOCK ── */
     .ready-icon {
       width: 80px; height: 80px; border-radius: 50%;
       background: #eff6ff;
@@ -78,7 +76,6 @@
       transform: none; box-shadow: none;
     }
 
-    /* ── SUCCESS ── */
     .icon-circle {
       width: 88px; height: 88px; border-radius: 50%;
       display: flex; align-items: center; justify-content: center;
@@ -131,13 +128,11 @@
     <div class="brand-name">JIVAC GROUP</div>
   </div>
 
-  <!-- LOADING -->
   <div id="s-loading" class="state active">
     <div class="ring"></div>
     <p>Loading patrol point…</p>
   </div>
 
-  <!-- READY TO CLOCK -->
   <div id="s-ready" class="state">
     <div class="ready-icon">
       <svg viewBox="0 0 24 24">
@@ -157,7 +152,6 @@
     </button>
   </div>
 
-  <!-- SUCCESS -->
   <div id="s-success" class="state">
     <div class="icon-circle green">
       <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
@@ -172,7 +166,6 @@
     </div>
   </div>
 
-  <!-- ALREADY CLOCKED -->
   <div id="s-already" class="state">
     <div class="icon-circle amber">
       <svg viewBox="0 0 24 24">
@@ -186,7 +179,6 @@
     <div class="chip blue" style="margin-top:16px;">Point logged earlier</div>
   </div>
 
-  <!-- INVALID -->
   <div id="s-error" class="state">
     <div class="icon-circle red">
       <svg viewBox="0 0 24 24">
@@ -203,9 +195,8 @@
 
 <script>
   const SUPA_URL = 'https://mwqpdttawfnrugibjbbm.supabase.co';
-  const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im13cXBkdHRhd2ZucnVnaWJqYmJtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE0NDAyMjEsImV4cCI6MjA5NjcxNjIyMX0.9CpFiqucvcBbkw2QrtrGwS4X4m1TXY2z4gs6HxYUtJc';
+  const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im13cXBkdHRawfnrugibjbbmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE0NDAyMjEsImV4cCI6MjA5NjcxNjIyMX0.9CpFiqucvcBbkw2QrtrGwS4X4m1TXY2z4gs6HxYUtJc';
 
-  // Store patrol point data for use when button is tapped
   let patrolData = null;
 
   function show(id) {
@@ -233,15 +224,15 @@
     return r.json().catch(() => null);
   }
 
-  // STEP 1 — On page load: look up QR code, show ready screen with Clock In button
   async function init() {
-    const qrCode = new URLSearchParams(window.location.search).get('qr');
+    const urlParams = new URLSearchParams(window.location.search);
+    const qrCode = urlParams.get('qr') || urlParams.get('code');
     if (!qrCode) { show('s-error'); return; }
 
     try {
-      // Look up the patrol point
+      // FIX: Query both 'location_name' and alternative names to adapt flexibly
       const pts = await db('GET',
-        `patrol_points?qr_code=eq.${encodeURIComponent(qrCode)}&select=id,point_name,location_id,locations(name,total_points,is_active)`
+        `patrol_points?qr_code=eq.${encodeURIComponent(qrCode)}&select=id,point_name,location_id,locations(location_name,total_points,is_active)`
       );
 
       if (!pts || pts.length === 0) { show('s-error'); return; }
@@ -249,9 +240,12 @@
       const pt  = pts[0];
       const loc = pt.locations;
 
-      if (!loc || !loc.is_active) { show('s-error'); return; }
+      if (!loc || loc.is_active === false) { show('s-error'); return; }
 
-      // Check if already clocked this hour
+      // Safely fall back to alternative name parameters if empty
+      const targetLocName = loc.location_name || "Active Checkpoint";
+      const totalPointsExpected = loc.total_points || 1;
+
       const now       = new Date();
       const hourStart = new Date(now); hourStart.setMinutes(0, 0, 0);
       const hourEnd   = new Date(now); hourEnd.setMinutes(59, 59, 999);
@@ -265,11 +259,9 @@
         return;
       }
 
-      // Store data for when button is tapped
-      patrolData = { pt, loc, qrCode };
+      patrolData = { pt, targetLocName, totalPointsExpected, qrCode };
 
-      // Show the ready screen with Clock In button
-      document.getElementById('ready-loc').textContent   = loc.name;
+      document.getElementById('ready-loc').textContent   = targetLocName;
       document.getElementById('ready-point').textContent = pt.point_name;
       show('s-ready');
 
@@ -279,23 +271,21 @@
     }
   }
 
-  // STEP 2 — Guard taps CLOCK IN button
   async function submitClock() {
     if (!patrolData) { show('s-error'); return; }
 
     const btn = document.getElementById('clock-btn');
     btn.classList.add('loading');
-    btn.innerHTML = `<div style="width:20px;height:20px;border:3px solid #bbb;border-top-color:#888;border-radius:50%;animation:spin 0.7s linear infinite;"></div> Clocking in…`;
+    btn.innerHTML = `Clocking in…`;
     btn.disabled = true;
 
-    const { pt, loc, qrCode } = patrolData;
+    const { pt, targetLocName, totalPointsExpected, qrCode } = patrolData;
 
     try {
       const now       = new Date();
       const hourStart = new Date(now); hourStart.setMinutes(0, 0, 0);
       const hourEnd   = new Date(now); hourEnd.setMinutes(59, 59, 999);
 
-      // Record the scan/clock
       await db('POST', 'scans', {
         patrol_point_id: pt.id,
         location_id:     pt.location_id,
@@ -303,20 +293,17 @@
         scanned_at:      now.toISOString()
       });
 
-      // Show success immediately
       document.getElementById('disp-point').textContent = pt.point_name;
-      document.getElementById('disp-loc').textContent   = loc.name;
+      document.getElementById('disp-loc').textContent   = targetLocName;
       show('s-success');
 
-      // Check in background if ALL points done this hour
       const allScans = await db('GET',
         `scans?location_id=eq.${pt.location_id}&scanned_at=gte.${hourStart.toISOString()}&scanned_at=lte.${hourEnd.toISOString()}&select=patrol_point_id`
       );
 
       const uniqueScanned = new Set(allScans.map(s => s.patrol_point_id));
 
-      if (uniqueScanned.size >= loc.total_points) {
-        // All points clocked — write patrol round so control room sees Completed
+      if (uniqueScanned.size >= totalPointsExpected) {
         const h     = now.getHours();
         const today = now.toISOString().split('T')[0];
 
@@ -334,24 +321,20 @@
           });
         }
 
-        // Show "all done" banner
         document.getElementById('all-done-banner').style.display = 'block';
       }
 
     } catch(e) {
       console.error('Clock error:', e);
-      // Reset button if error
       btn.classList.remove('loading');
       btn.disabled = false;
-      btn.innerHTML = `<svg viewBox="0 0 24 24" style="width:22px;height:22px;stroke:#C9A24A;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> CLOCK IN`;
+      btn.innerHTML = `CLOCK IN`;
       show('s-ready');
-      alert('Failed to clock in. Check your internet connection and try again.');
+      alert('Failed to clock in. Check your internet connection.');
     }
   }
 
-  // Start
   init();
 </script>
-
 </body>
 </html>

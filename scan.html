@@ -3,10 +3,9 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>JIVAC Patrol</title>
+  <title>JIVAC Patrol Fast-Clock</title>
   <style>
     *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
-
     body {
       font-family:'Segoe UI', system-ui, sans-serif;
       background: linear-gradient(160deg, #062B63 0%, #0a1f4e 100%);
@@ -15,326 +14,120 @@
       align-items: center; justify-content: center;
       padding: 24px;
     }
-
     .card {
       background: #fff; border-radius: 24px; padding: 40px 32px 36px;
       width: 100%; max-width: 360px; text-align: center;
       box-shadow: 0 32px 80px rgba(0,0,0,0.4);
     }
-
     .card-header {
       display: flex; align-items: center; justify-content: center; gap: 10px;
       padding-bottom: 20px; margin-bottom: 28px; border-bottom: 3px solid #C9A24A;
     }
-    .logo-box {
-      width: 38px; height: 38px; background: #062B63; border-radius: 7px;
-      display: flex; align-items: center; justify-content: center;
-      font-weight: 900; font-size: 13px; color: #C9A24A;
-    }
     .brand-name { font-size: 16px; font-weight: 800; color: #062B63; letter-spacing: 1px; }
-
     .state { display: none; }
     .state.active { display: block; }
-
-    #s-loading .ring {
-      width: 60px; height: 60px; border: 5px solid #e8f0fe;
-      border-top-color: #1E90FF; border-radius: 50%;
-      animation: spin 0.8s linear infinite; margin: 0 auto 16px;
-    }
-    @keyframes spin { to { transform:rotate(360deg); } }
-    #s-loading p { color: #888; font-size: 15px; }
-
     .ready-icon {
-      width: 80px; height: 80px; border-radius: 50%;
-      background: #eff6ff;
-      display: flex; align-items: center; justify-content: center;
-      margin: 0 auto 20px;
+      width: 80px; height: 80px; border-radius: 50%; background: #eff6ff;
+      display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;
     }
-    .ready-icon svg { width: 38px; height: 38px; stroke: #1E90FF; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
-
-    .location-label { font-size: 12px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 6px; }
-    .location-name  { font-size: 20px; font-weight: 900; color: #062B63; margin-bottom: 4px; line-height: 1.2; }
-    .point-label    { font-size: 13px; color: #888; margin-bottom: 28px; }
-    .point-label strong { color: #1E90FF; font-weight: 700; }
-
+    .ready-icon svg { width: 38px; height: 38px; stroke: #1E90FF; fill: none; stroke-width: 2.5; }
+    .code-display { font-size: 18px; font-weight: 800; color: #062B63; margin-bottom: 24px; word-break: break-all; }
     .clock-btn {
-      width: 100%; padding: 16px;
-      background: #062B63; color: #C9A24A;
-      border: none; border-radius: 14px;
-      font-size: 18px; font-weight: 900;
-      letter-spacing: 1px; cursor: pointer;
-      transition: all 0.2s;
-      display: flex; align-items: center; justify-content: center; gap: 10px;
-      box-shadow: 0 8px 24px rgba(6,43,99,0.25);
+      width: 100%; padding: 16px; background: #062B63; color: #C9A24A;
+      border: none; border-radius: 14px; font-size: 18px; font-weight: 900;
+      cursor: pointer; box-shadow: 0 8px 24px rgba(6,43,99,0.25);
     }
-    .clock-btn:hover  { background: #0B4FAF; transform: translateY(-2px); box-shadow: 0 12px 32px rgba(6,43,99,0.35); }
-    .clock-btn:active { transform: translateY(0); }
-    .clock-btn svg { width: 22px; height: 22px; stroke: #C9A24A; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
-
-    .clock-btn.loading {
-      background: #d1d9f0; color: #888; cursor: not-allowed;
-      transform: none; box-shadow: none;
-    }
-
+    .clock-btn:disabled { background: #d1d9f0; color: #888; cursor: not-allowed; }
     .icon-circle {
-      width: 88px; height: 88px; border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      margin: 0 auto 20px;
-      animation: pop 0.5s cubic-bezier(.175,.885,.32,1.275);
+      width: 88px; height: 88px; border-radius: 50%; background: #dcfce7;
+      display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;
     }
-    @keyframes pop { from{transform:scale(0);opacity:0} to{transform:scale(1);opacity:1} }
-
-    .icon-circle.green { background: #dcfce7; }
-    .icon-circle.amber { background: #fef9c3; }
-    .icon-circle.red   { background: #fee2e2; }
-
-    .icon-circle svg { width: 40px; height: 40px; fill: none; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
-    .icon-circle.green svg { stroke: #16a34a; }
-    .icon-circle.amber svg { stroke: #ca8a04; }
-    .icon-circle.red   svg { stroke: #dc2626; }
-
+    .icon-circle svg { width: 40px; height: 40px; stroke: #16a34a; fill: none; stroke-width: 3; }
     .state-title { font-size: 24px; font-weight: 900; color: #062B63; margin-bottom: 6px; }
-    .state-sub   { font-size: 14px; color: #666; line-height: 1.6; }
-
-    .success-point { font-size: 17px; font-weight: 800; color: #1E90FF; margin: 10px 0 3px; }
-    .success-loc   { font-size: 13px; color: #888; margin-bottom: 16px; }
-
-    .chip {
-      display: inline-flex; align-items: center; gap: 6px;
-      padding: 8px 20px; border-radius: 20px; font-size: 13px; font-weight: 700;
-    }
-    .chip.green { background: #dcfce7; color: #16a34a; border: 1.5px solid #86efac; }
-    .chip.blue  { background: #dbeafe; color: #1d4ed8; border: 1.5px solid #93c5fd; }
-
-    .all-done-banner {
-      margin-top: 16px; background: #f0fdf4;
-      border: 1.5px solid #86efac; border-radius: 12px; padding: 14px 16px;
-    }
-    .all-done-banner .done-title { font-size: 15px; font-weight: 800; color: #16a34a; margin-bottom: 2px; }
-    .all-done-banner .done-sub   { font-size: 12px; color: #4ade80; }
-
-    footer {
-      margin-top: 28px; font-size: 11px;
-      color: rgba(255,255,255,0.3);
-      letter-spacing: 1.5px; text-transform: uppercase;
-    }
+    .state-sub { font-size: 14px; color: #666; }
   </style>
 </head>
 <body>
 
 <div class="card">
   <div class="card-header">
-    <div class="logo-box">JG</div>
-    <div class="brand-name">JIVAC GROUP</div>
+    <div class="brand-name">JIVAC GROUP PATROL</div>
   </div>
 
-  <div id="s-loading" class="state active">
-    <div class="ring"></div>
-    <p>Loading patrol point…</p>
-  </div>
-
-  <div id="s-ready" class="state">
+  <div id="s-ready" class="state active">
     <div class="ready-icon">
-      <svg viewBox="0 0 24 24">
-        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-        <circle cx="12" cy="10" r="3"/>
-      </svg>
+      <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
     </div>
-    <div class="location-label">Location</div>
-    <div class="location-name" id="ready-loc"></div>
-    <div class="point-label">Point: <strong id="ready-point"></strong></div>
-    <button class="clock-btn" id="clock-btn" onclick="submitClock()">
-      <svg viewBox="0 0 24 24">
-        <circle cx="12" cy="12" r="10"/>
-        <polyline points="12 6 12 12 16 14"/>
-      </svg>
-      CLOCK IN
-    </button>
+    <div style="font-size: 12px; color: #888; text-transform: uppercase; margin-bottom: 4px;">Scanned Checkpoint</div>
+    <div class="code-display" id="code-text">Reading code...</div>
+    <button class="clock-btn" id="clock-btn" onclick="sendToControlRoom()">CLOCK IN</button>
   </div>
 
   <div id="s-success" class="state">
-    <div class="icon-circle green">
+    <div class="icon-circle">
       <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
     </div>
-    <div class="state-title">Clocked In!</div>
-    <div class="success-point" id="disp-point"></div>
-    <div class="success-loc"   id="disp-loc"></div>
-    <div class="chip green">✓ Point Recorded</div>
-    <div class="all-done-banner" id="all-done-banner" style="display:none">
-      <div class="done-title">Patrol Complete!</div>
-      <div class="done-sub">All points clocked for this hour</div>
-    </div>
-  </div>
-
-  <div id="s-already" class="state">
-    <div class="icon-circle amber">
-      <svg viewBox="0 0 24 24">
-        <circle cx="12" cy="12" r="10"/>
-        <line x1="12" y1="8" x2="12" y2="12"/>
-        <line x1="12" y1="16" x2="12.01" y2="16"/>
-      </svg>
-    </div>
-    <div class="state-title">Already Clocked</div>
-    <div class="state-sub">This point was already recorded this hour.<br>No duplicate needed.</div>
-    <div class="chip blue" style="margin-top:16px;">Point logged earlier</div>
+    <div class="state-title">Sent to Control!</div>
+    <div class="state-sub">Patrol round successfully recorded.</div>
   </div>
 
   <div id="s-error" class="state">
-    <div class="icon-circle red">
-      <svg viewBox="0 0 24 24">
-        <line x1="18" y1="6" x2="6" y2="18"/>
-        <line x1="6"  y1="6" x2="18" y2="18"/>
-      </svg>
-    </div>
-    <div class="state-title">Invalid Code</div>
-    <div class="state-sub">This QR code is not recognised.<br>Contact your supervisor.</div>
+    <div class="icon-circle" style="background:#fee2e2;"><svg viewBox="0 0 24 24" style="stroke:#dc2626;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>
+    <div class="state-title">No Code Found</div>
+    <div class="state-sub">Please scan a valid JIVAC QR code link.</div>
   </div>
 </div>
 
-<footer>JIVAC GROUP · Patrol Management System</footer>
-
 <script>
   const SUPA_URL = 'https://mwqpdttawfnrugibjbbm.supabase.co';
-  const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im13cXBkdHRawfnrugibjbbmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE0NDAyMjEsImV4cCI6MjA5NjcxNjIyMX0.9CpFiqucvcBbkw2QrtrGwS4X4m1TXY2z4gs6HxYUtJc';
+  const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im13cXBkdHRhd2ZucnVnaWJqYmJtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE0NDAyMjEsImV4cCI6MjA5NjcxNjIyMX0.9CpFiqucvcBbkw2QrtrGwS4X4m1TXY2z4gs6HxYUtJc';
 
-  let patrolData = null;
+  const urlParams = new URLSearchParams(window.location.search);
+  const scannedCode = urlParams.get('qr') || urlParams.get('code');
 
-  function show(id) {
-    document.querySelectorAll('.state').forEach(s => s.classList.remove('active'));
-    document.getElementById(id).classList.add('active');
+  if (!scannedCode) {
+    document.getElementById('s-ready').style.display = 'none';
+    document.getElementById('s-error').style.display = 'block';
+  } else {
+    document.getElementById('code-text').textContent = scannedCode;
   }
 
-  async function db(method, path, body) {
-    const r = await fetch(`${SUPA_URL}/rest/v1/${path}`, {
-      method,
-      headers: {
-        'apikey': SUPA_KEY,
-        'Authorization': `Bearer ${SUPA_KEY}`,
-        'Content-Type': 'application/json',
-        'Prefer': method === 'POST' ? 'return=representation' : ''
-      },
-      body: body ? JSON.stringify(body) : undefined
-    });
-    if (r.status === 204) return true;
-    if (!r.ok) {
-      const txt = await r.text();
-      console.error('DB error:', r.status, txt);
-      throw new Error(`DB ${r.status}: ${txt}`);
-    }
-    return r.json().catch(() => null);
-  }
-
-  async function init() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const qrCode = urlParams.get('qr') || urlParams.get('code');
-    if (!qrCode) { show('s-error'); return; }
-
-    try {
-      // FIX: Query both 'location_name' and alternative names to adapt flexibly
-      const pts = await db('GET',
-        `patrol_points?qr_code=eq.${encodeURIComponent(qrCode)}&select=id,point_name,location_id,locations(location_name,total_points,is_active)`
-      );
-
-      if (!pts || pts.length === 0) { show('s-error'); return; }
-
-      const pt  = pts[0];
-      const loc = pt.locations;
-
-      if (!loc || loc.is_active === false) { show('s-error'); return; }
-
-      // Safely fall back to alternative name parameters if empty
-      const targetLocName = loc.location_name || "Active Checkpoint";
-      const totalPointsExpected = loc.total_points || 1;
-
-      const now       = new Date();
-      const hourStart = new Date(now); hourStart.setMinutes(0, 0, 0);
-      const hourEnd   = new Date(now); hourEnd.setMinutes(59, 59, 999);
-
-      const existing = await db('GET',
-        `scans?patrol_point_id=eq.${pt.id}&scanned_at=gte.${hourStart.toISOString()}&scanned_at=lte.${hourEnd.toISOString()}&select=id`
-      );
-
-      if (existing && existing.length > 0) {
-        show('s-already');
-        return;
-      }
-
-      patrolData = { pt, targetLocName, totalPointsExpected, qrCode };
-
-      document.getElementById('ready-loc').textContent   = targetLocName;
-      document.getElementById('ready-point').textContent = pt.point_name;
-      show('s-ready');
-
-    } catch(e) {
-      console.error('Init error:', e);
-      show('s-error');
-    }
-  }
-
-  async function submitClock() {
-    if (!patrolData) { show('s-error'); return; }
-
+  async function sendToControlRoom() {
     const btn = document.getElementById('clock-btn');
-    btn.classList.add('loading');
-    btn.innerHTML = `Clocking in…`;
     btn.disabled = true;
+    btn.textContent = "Sending...";
 
-    const { pt, targetLocName, totalPointsExpected, qrCode } = patrolData;
-
+    const now = new Date();
+    
     try {
-      const now       = new Date();
-      const hourStart = new Date(now); hourStart.setMinutes(0, 0, 0);
-      const hourEnd   = new Date(now); hourEnd.setMinutes(59, 59, 999);
-
-      await db('POST', 'scans', {
-        patrol_point_id: pt.id,
-        location_id:     pt.location_id,
-        qr_code:         qrCode,
-        scanned_at:      now.toISOString()
+      const response = await fetch(`${SUPA_URL}/rest/v1/patrol_rounds`, {
+        method: 'POST',
+        headers: {
+          'apikey': SUPA_KEY,
+          'Authorization': `Bearer ${SUPA_KEY}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          status: 'completed',
+          completed_at: now.toISOString(),
+          round_date: now.toISOString().split('T')[0],
+          hour_window: now.getHours(),
+          notes: `Scanned QR: ${scannedCode}`
+        })
       });
 
-      document.getElementById('disp-point').textContent = pt.point_name;
-      document.getElementById('disp-loc').textContent   = targetLocName;
-      show('s-success');
+      if (!response.ok) throw new Error('Failed to post data');
 
-      const allScans = await db('GET',
-        `scans?location_id=eq.${pt.location_id}&scanned_at=gte.${hourStart.toISOString()}&scanned_at=lte.${hourEnd.toISOString()}&select=patrol_point_id`
-      );
+      document.getElementById('s-ready').style.display = 'none';
+      document.getElementById('s-success').style.display = 'block';
 
-      const uniqueScanned = new Set(allScans.map(s => s.patrol_point_id));
-
-      if (uniqueScanned.size >= totalPointsExpected) {
-        const h     = now.getHours();
-        const today = now.toISOString().split('T')[0];
-
-        const existingRound = await db('GET',
-          `patrol_rounds?location_id=eq.${pt.location_id}&round_date=eq.${today}&hour_window=eq.${h}&select=id`
-        );
-
-        if (!existingRound || existingRound.length === 0) {
-          await db('POST', 'patrol_rounds', {
-            location_id:  pt.location_id,
-            status:       'completed',
-            completed_at: now.toISOString(),
-            round_date:   today,
-            hour_window:  h
-          });
-        }
-
-        document.getElementById('all-done-banner').style.display = 'block';
-      }
-
-    } catch(e) {
-      console.error('Clock error:', e);
-      btn.classList.remove('loading');
+    } catch (error) {
+      console.error(error);
       btn.disabled = false;
-      btn.innerHTML = `CLOCK IN`;
-      show('s-ready');
-      alert('Failed to clock in. Check your internet connection.');
+      btn.textContent = "CLOCK IN";
+      alert('Failed to send data. Please check your internet connection.');
     }
   }
-
-  init();
 </script>
 </body>
 </html>
